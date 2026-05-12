@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="es-MX">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#5B50F0">
+<title>{% block title %}FacturAI – Facturación CFDI 4.0 para México{% endblock %}</title>
+<link rel="stylesheet" href="/static/css/style.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+{% block head %}{% endblock %}
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="/" class="nav-brand">
+    <div class="nav-logo">F</div>
+    Factur<span>AI</span>
+  </a>
+
+  <!-- Desktop links -->
+  <div class="nav-links">
+    <a href="/precios">Precios</a>
+    {% if user %}
+      <a href="/dashboard">Dashboard</a>
+      <a href="/perfil">Mi perfil</a>
+      <a href="/facturas/nueva" class="btn btn-primary btn-sm">+ Nueva Factura</a>
+      <a href="/logout" style="color:var(--gray)">Salir</a>
+    {% else %}
+      <a href="/login">Iniciar sesión</a>
+      <a href="/register" class="btn btn-primary btn-sm">Empezar gratis</a>
+    {% endif %}
+  </div>
+
+  <!-- Hamburger toggle -->
+  <button class="nav-toggle" id="nav-toggle" aria-label="Menú">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<!-- Mobile menu -->
+<div class="mobile-menu" id="mobile-menu">
+  <a href="/precios">Precios</a>
+  {% if user %}
+    <a href="/dashboard">Dashboard</a>
+    <a href="/perfil">Mi perfil fiscal</a>
+    <a href="/facturas/nueva" class="btn btn-primary">+ Nueva Factura CFDI</a>
+    <a href="/logout">Cerrar sesión</a>
+  {% else %}
+    <a href="/login">Iniciar sesión</a>
+    <a href="/register" class="btn btn-primary">Empezar gratis</a>
+  {% endif %}
+</div>
+
+{% block content %}{% endblock %}
+
+<footer>
+  <p>© 2026 FacturAI · Facturación CFDI 4.0 · México ·
+    <a href="/precios">Ver planes</a> ·
+    <a href="#" onclick="toggleChat();return false;">Hablar con Max</a>
+  </p>
+</footer>
+
+<!-- MASCOT MAX -->
+<div class="mascot-wrap">
+  <div class="mascot-bubble" id="mascot-bubble"></div>
+  <div class="mascot-avatar" id="mascot-avatar" title="Hablar con Max">
+    <svg viewBox="0 0 60 80" xmlns="http://www.w3.org/2000/svg">
+      <line x1="30" y1="4" x2="30" y2="14" stroke="#5B50F0" stroke-width="2.5" stroke-linecap="round"/>
+      <circle cx="30" cy="3" r="4.5" fill="#10B981"/>
+      <rect x="7" y="12" width="46" height="36" rx="13" fill="#5B50F0"/>
+      <!-- Eye whites -->
+      <ellipse cx="19.5" cy="30" rx="7.5" ry="7.5" fill="white"/>
+      <ellipse cx="40.5" cy="30" rx="7.5" ry="7.5" fill="white"/>
+      <!-- Pupils -->
+      <ellipse class="eye-l" cx="20.5" cy="31" rx="4" ry="4" fill="#1E1B4B"/>
+      <ellipse class="eye-r" cx="41.5" cy="31" rx="4" ry="4" fill="#1E1B4B"/>
+      <!-- Shine -->
+      <circle cx="22" cy="28.5" r="1.8" fill="white"/>
+      <circle cx="43" cy="28.5" r="1.8" fill="white"/>
+      <!-- Smile -->
+      <path d="M17 42 Q30 51 43 42" stroke="white" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+      <!-- Body -->
+      <rect x="11" y="52" width="38" height="25" rx="9" fill="#3730A3"/>
+      <!-- Screen -->
+      <rect x="17" y="57" width="26" height="13" rx="5" fill="#5B50F0"/>
+      <text x="30" y="65.5" text-anchor="middle" fill="#10B981" font-size="4.8" font-weight="bold" font-family="monospace">CFDI 4.0</text>
+      <!-- Left arm -->
+      <rect x="0" y="54" width="13" height="8" rx="4" fill="#3730A3"/>
+      <!-- Right arm (wave) -->
+      <rect class="arm-wave" x="47" y="51" width="13" height="8" rx="4" fill="#3730A3"/>
+      <!-- Legs -->
+      <rect x="16" y="75" width="10" height="5" rx="2.5" fill="#2E1065"/>
+      <rect x="34" y="75" width="10" height="5" rx="2.5" fill="#2E1065"/>
+    </svg>
+  </div>
+</div>
+
+<!-- CHAT WIDGET -->
+<div class="chat-panel" id="chat-panel">
+  <div class="chat-header">
+    <div class="chat-header-avatar">🤖</div>
+    <div class="chat-header-info">
+      <div class="chat-name">Max · Asistente IA</div>
+      <div class="chat-status">
+        <span class="chat-status-dot"></span>
+        Experto en CFDI 4.0 y SAT
+      </div>
+    </div>
+  </div>
+  <div class="chat-messages" id="chat-messages"></div>
+  <div class="chat-suggestions">
+    <button class="chat-suggestion">¿Qué es el RFC?</button>
+    <button class="chat-suggestion">IVA 16% México</button>
+    <button class="chat-suggestion">Uso CFDI G03</button>
+  </div>
+  <div class="chat-input-wrap">
+    <textarea id="chat-input" placeholder="Pregunta sobre CFDI, SAT, facturas..." rows="1"></textarea>
+    <button class="chat-send" title="Enviar">➤</button>
+  </div>
+</div>
+
+<button class="chat-btn" id="chat-btn" title="Hablar con Max">
+  <span class="chat-icon">🤖</span>
+  <span class="chat-close">✕</span>
+</button>
+
+<script src="/static/js/main.js"></script>
+<script>
+  // Hamburger menu
+  const toggle = document.getElementById('nav-toggle');
+  const menu = document.getElementById('mobile-menu');
+  toggle.addEventListener('click', () => {
+    toggle.classList.toggle('open');
+    menu.classList.toggle('open');
+    document.body.style.overflow = menu.classList.contains('open') ? 'hidden' : '';
+  });
+  // Close menu on link click
+  menu.querySelectorAll('a').forEach(a => a.addEventListener('click', () => {
+    toggle.classList.remove('open');
+    menu.classList.remove('open');
+    document.body.style.overflow = '';
+  }));
+</script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

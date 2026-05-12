@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+{% block title %}Factura {{ inv.invoice_number }} – FacturAI{% endblock %}
+{% block content %}
+<div class="invoice-view">
+  <div class="no-print" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;flex-wrap:wrap;gap:.8rem;">
+    <a href="/dashboard" class="btn btn-ghost">← Volver al dashboard</a>
+    <button onclick="window.print()" class="btn btn-primary">🖨️ Imprimir / PDF</button>
+  </div>
+
+  <div class="invoice-paper">
+
+    <!-- ENCABEZADO -->
+    <div class="invoice-paper-header">
+      <div>
+        <div class="inv-brand">Factur<span>AI</span></div>
+        <div class="inv-brand-sub">{{ user.name }}</div>
+        {% if user.rfc %}<div class="inv-brand-rfc">RFC: {{ user.rfc }}</div>{% endif %}
+        {% if user.regimen_fiscal %}
+        <div class="inv-brand-rfc">Régimen: {{ user.regimen_fiscal }} – {{ regimenes.get(user.regimen_fiscal, '') }}</div>
+        {% endif %}
+        {% if user.cp %}<div class="inv-brand-rfc">C.P.: {{ user.cp }}</div>{% endif %}
+        {% if user.email %}<div class="inv-brand-rfc">{{ user.email }}</div>{% endif %}
+      </div>
+      <div class="invoice-meta">
+        <div class="inv-number">{{ inv.invoice_number }}</div>
+        <div class="inv-meta-row">Tipo: Ingreso (I)</div>
+        <div class="inv-meta-row">Fecha emisión: {{ inv.issue_date }}</div>
+        {% if inv.due_date %}<div class="inv-meta-row">Vencimiento: {{ inv.due_date }}</div>{% endif %}
+        <div class="inv-meta-row">Moneda: {{ inv.moneda or 'MXN' }}</div>
+        <div style="margin-top:.6rem;">
+          <span class="badge badge-{{ inv.status }}">{{ inv.status.upper() }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- EMISOR / RECEPTOR -->
+    <div class="inv-parties">
+      <div>
+        <div class="party-label">Emisor</div>
+        <div class="party-name">{{ user.name }}</div>
+        {% if user.rfc %}<div class="party-detail">RFC: <strong>{{ user.rfc }}</strong></div>{% endif %}
+        {% if user.regimen_fiscal %}
+        <div class="party-detail">Régimen fiscal: {{ user.regimen_fiscal }}</div>
+        {% endif %}
+        {% if user.cp %}<div class="party-detail">C.P. Expedición: {{ user.cp }}</div>{% endif %}
+      </div>
+      <div>
+        <div class="party-label">Receptor</div>
+        <div class="party-name">{{ inv.client_name }}</div>
+        {% if inv.rfc_receptor %}<div class="party-detail">RFC: <strong>{{ inv.rfc_receptor }}</strong></div>{% endif %}
+        {% if inv.cp_receptor %}<div class="party-detail">C.P.: {{ inv.cp_receptor }}</div>{% endif %}
+        {% if inv.regimen_fiscal_receptor %}
+        <div class="party-detail">Régimen fiscal: {{ inv.regimen_fiscal_receptor }}</div>
+        {% endif %}
+        {% if inv.client_email %}<div class="party-detail">{{ inv.client_email }}</div>{% endif %}
+        {% if inv.client_address %}<div class="party-detail">{{ inv.client_address }}</div>{% endif %}
+        <div class="cfdi-tags">
+          {% if inv.uso_cfdi %}
+          <span class="cfdi-tag">Uso: {{ inv.uso_cfdi }} – {{ usos_cfdi.get(inv.uso_cfdi, '') }}</span>
+          {% endif %}
+          {% if inv.forma_pago %}
+          <span class="cfdi-tag">Pago: {{ inv.forma_pago }} – {{ formas_pago.get(inv.forma_pago, '') }}</span>
+          {% endif %}
+          {% if inv.metodo_pago %}
+          <span class="cfdi-tag">Método: {{ inv.metodo_pago }}</span>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- CONCEPTOS -->
+    <table class="inv-table">
+      <thead>
+        <tr>
+          <th>Descripción / Concepto</th>
+          <th style="text-align:right;">Cantidad</th>
+          <th style="text-align:right;">Precio unit.</th>
+          <th style="text-align:right;">Importe</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in items %}
+        <tr>
+          <td>{{ item.description }}</td>
+          <td style="text-align:right;">{{ item.qty }}</td>
+          <td style="text-align:right;">${{ "%.2f"|format(item.price) }}</td>
+          <td style="text-align:right;font-weight:700;">${{ "%.2f"|format(item.total) }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <!-- TOTALES E IMPUESTOS -->
+    <div class="inv-totals">
+      <p>Subtotal: <strong>${{ "%.2f"|format(inv.subtotal) }} MXN</strong></p>
+      {% if inv.tax_rate and inv.tax_rate > 0 %}
+      <p>IVA ({{ "%.0f"|format(inv.tax_rate) }}%) Traslado: <strong>${{ "%.2f"|format(inv.tax_amount) }} MXN</strong></p>
+      {% endif %}
+      <p class="inv-grand">Total: <strong>${{ "%.2f"|format(inv.total) }} MXN</strong></p>
+    </div>
+
+    {% if inv.notes %}
+    <div style="margin-top:2rem;padding-top:1.5rem;border-top:1px solid var(--border);">
+      <div style="font-size:.75rem;color:var(--gray);font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:.5rem;">Observaciones</div>
+      <p style="color:var(--gray);font-size:.93rem;">{{ inv.notes }}</p>
+    </div>
+    {% endif %}
+
+    <div class="inv-footer-note">
+      ⚠️ Este documento es una representación impresa de referencia de CFDI 4.0.
+      El timbrado fiscal válido ante el SAT requiere certificación por un PAC autorizado.
+    </div>
+
+    <div class="inv-bottom">
+      Generado con FacturAI · Facturación CFDI 4.0 para México · facturai.mx
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% block title %}Dashboard – FacturAI{% endblock %}
+{% block content %}
+<div class="dashboard">
+  <div class="dash-header">
+    <div>
+      <h1>Hola, {{ user.name.split()[0] }}
+        <span class="plan-badge-dash {% if user.plan != 'free' %}pro{% endif %}">{{ user.plan.upper() }}</span>
+      </h1>
+      <p style="color:var(--gray);margin-top:.2rem;font-size:.95rem;">Panel de facturación CFDI 4.0</p>
+      {% if not user.rfc %}
+      <p style="color:var(--accent);font-size:.85rem;margin-top:.4rem;">
+        ⚠️ Tu RFC no está configurado.
+        <a href="/perfil" style="color:var(--primary);font-weight:600;">Configúralo en tu perfil →</a>
+      </p>
+      {% endif %}
+    </div>
+    <a href="/facturas/nueva" class="btn btn-primary btn-lg">+ Nueva Factura CFDI</a>
+  </div>
+
+  {% if user.plan == 'free' and user.invoices_created >= 2 %}
+  <div class="alert alert-warning">
+    ⚠️ Te queda <strong>{{ 3 - user.invoices_created }} factura{% if 3 - user.invoices_created != 1 %}s{% endif %}</strong> en el plan gratuito.
+    <a href="/precios" style="color:inherit;font-weight:700;">Actualiza a Básico por $199/mes →</a>
+  </div>
+  {% endif %}
+
+  {% if request.query_params.get('upgraded') %}
+  <div class="alert alert-success">✓ ¡Suscripción activada! Ya puedes crear facturas ilimitadas.</div>
+  {% endif %}
+
+  <div class="stats">
+    <div class="stat-card">
+      <div class="label">Facturas creadas</div>
+      <div class="value">{{ user.invoices_created }}</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">Total facturado</div>
+      <div class="value" style="font-size:1.6rem;">${{ "{:,.0f}".format(invoices|sum(attribute='total')) if invoices else 0 }}</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">Plan actual</div>
+      <div class="value" style="font-size:1.4rem;margin-top:.3rem;">{{ user.plan.capitalize() }}</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">Estado suscripción</div>
+      <div class="value" style="font-size:1.2rem;margin-top:.3rem;color:{% if user.subscription_status == 'active' %}var(--secondary){% else %}var(--gray){% endif %}">
+        {{ 'Activa' if user.subscription_status == 'active' else 'Sin suscripción' }}
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      Mis facturas recientes
+      {% if invoices %}
+      <span style="color:var(--gray);font-size:.85rem;font-weight:400;">{{ invoices|length }} facturas</span>
+      {% endif %}
+    </div>
+    {% if invoices %}
+    <table>
+      <thead>
+        <tr>
+          <th>Número</th>
+          <th>Cliente</th>
+          <th>RFC Receptor</th>
+          <th>Fecha</th>
+          <th>Total (MXN)</th>
+          <th>Estado</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for inv in invoices %}
+        <tr>
+          <td><strong style="font-family:monospace;font-size:.9rem;">{{ inv.invoice_number }}</strong></td>
+          <td>{{ inv.client_name }}</td>
+          <td style="font-family:monospace;font-size:.82rem;color:var(--gray);">{{ inv.rfc_receptor or '—' }}</td>
+          <td>{{ inv.issue_date }}</td>
+          <td><strong>${{ "{:,.2f}".format(inv.total) }}</strong></td>
+          <td><span class="badge badge-{{ inv.status }}">{{ inv.status.upper() }}</span></td>
+          <td><a href="/facturas/{{ inv.id }}" class="btn btn-ghost" style="padding:.3rem .8rem;font-size:.82rem;">Ver</a></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <div style="text-align:center;padding:4rem;color:var(--gray);">
+      <div style="font-size:4rem;margin-bottom:1rem;">🧾</div>
+      <p style="font-size:1.1rem;font-weight:600;margin-bottom:.5rem;">Aún no tienes facturas</p>
+      <p style="font-size:.9rem;">Crea tu primera factura CFDI 4.0 en menos de un minuto</p>
+      <a href="/facturas/nueva" class="btn btn-primary" style="margin-top:1.5rem;">Crear primera factura CFDI</a>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

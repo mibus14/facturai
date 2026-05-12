@@ -1,0 +1,265 @@
+{% extends "base.html" %}
+{% block title %}Nueva Factura CFDI – FacturAI{% endblock %}
+{% block content %}
+<div class="form-page">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem;">
+    <div>
+      <h1 style="font-size:1.6rem;font-weight:900;letter-spacing:-.5px;">Nueva Factura CFDI 4.0</h1>
+      <p style="color:var(--gray);font-size:.9rem;margin-top:.2rem;">Completa los campos para generar tu comprobante fiscal</p>
+    </div>
+    <a href="/dashboard" class="btn btn-ghost">← Volver</a>
+  </div>
+
+  <form method="post" action="/facturas/nueva" id="invoice-form">
+
+    <!-- EMISOR -->
+    <div class="form-card">
+      <div class="form-card-header">
+        <div class="form-card-icon">🏢</div>
+        <div class="form-title">Emisor (tú)</div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Nombre / Razón social</label>
+          <input type="text" value="{{ user.name }}" disabled style="background:var(--light);color:var(--gray)">
+          <small>Editable en <a href="/perfil" style="color:var(--primary)">Mi perfil</a></small>
+        </div>
+        <div class="form-group">
+          <label>RFC del emisor</label>
+          <input type="text" value="{{ user.rfc or 'Sin RFC – configura en tu perfil' }}" disabled style="background:var(--light);color:var(--gray);text-transform:uppercase">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Régimen fiscal</label>
+          <input type="text" value="{{ user.regimen_fiscal or '612' }} – {{ regimenes.get(user.regimen_fiscal or '612', '') }}" disabled style="background:var(--light);color:var(--gray)">
+        </div>
+        <div class="form-group">
+          <label>Código postal expedición</label>
+          <input type="text" value="{{ user.cp or 'Sin CP – configura en tu perfil' }}" disabled style="background:var(--light);color:var(--gray)">
+        </div>
+      </div>
+    </div>
+
+    <!-- RECEPTOR -->
+    <div class="form-card">
+      <div class="form-card-header">
+        <div class="form-card-icon">👤</div>
+        <div class="form-title">Receptor (tu cliente)</div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Nombre o razón social *</label>
+          <input type="text" name="client_name" placeholder="Empresa XYZ S.A. de C.V." required>
+        </div>
+        <div class="form-group">
+          <label>RFC del receptor *</label>
+          <input type="text" name="rfc_receptor" placeholder="XAXX010101000" maxlength="13" style="text-transform:uppercase" required>
+          <small>XAXX010101000 para público en general</small>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Email del cliente</label>
+          <input type="email" name="client_email" placeholder="cliente@empresa.com">
+        </div>
+        <div class="form-group">
+          <label>Código postal del receptor *</label>
+          <input type="text" name="cp_receptor" placeholder="06600" maxlength="5" required>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Domicilio / Dirección</label>
+        <input type="text" name="client_address" placeholder="Av. Reforma 250, Col. Juárez, CDMX">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Régimen fiscal del receptor *</label>
+          <select name="regimen_fiscal_receptor">
+            {% for code, name in regimenes.items() %}
+            <option value="{{ code }}" {% if code == '616' %}selected{% endif %}>{{ code }} – {{ name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Uso del CFDI *</label>
+          <select name="uso_cfdi">
+            {% for code, name in usos_cfdi.items() %}
+            <option value="{{ code }}" {% if code == 'G03' %}selected{% endif %}>{{ code }} – {{ name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- PAGO Y FECHAS -->
+    <div class="form-card">
+      <div class="form-card-header">
+        <div class="form-card-icon">💳</div>
+        <div class="form-title">Datos de pago y fechas</div>
+      </div>
+      <div class="form-row-3">
+        <div class="form-group">
+          <label>Forma de pago</label>
+          <select name="forma_pago">
+            {% for code, name in formas_pago.items() %}
+            <option value="{{ code }}" {% if code == '03' %}selected{% endif %}>{{ code }} – {{ name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Método de pago</label>
+          <select name="metodo_pago">
+            <option value="PUE" selected>PUE – Una sola exhibición</option>
+            <option value="PPD">PPD – Parcialidades o diferido</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Moneda</label>
+          <input type="text" value="MXN – Peso Mexicano" disabled style="background:var(--light);color:var(--gray)">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Fecha de emisión *</label>
+          <input type="date" name="issue_date" id="issue_date" required>
+        </div>
+        <div class="form-group">
+          <label>Fecha de vencimiento</label>
+          <input type="date" name="due_date" id="due_date">
+        </div>
+      </div>
+    </div>
+
+    <!-- CONCEPTOS -->
+    <div class="form-card">
+      <div class="form-card-header">
+        <div class="form-card-icon">📋</div>
+        <div class="form-title">Conceptos</div>
+      </div>
+      <div style="display:grid;grid-template-columns:3fr 1fr 1fr 1fr auto;gap:.5rem;margin-bottom:.5rem;">
+        <span style="font-size:.75rem;font-weight:700;color:var(--gray);text-transform:uppercase;">Descripción</span>
+        <span style="font-size:.75rem;font-weight:700;color:var(--gray);text-transform:uppercase;">Cantidad</span>
+        <span style="font-size:.75rem;font-weight:700;color:var(--gray);text-transform:uppercase;">Precio unit.</span>
+        <span style="font-size:.75rem;font-weight:700;color:var(--gray);text-transform:uppercase;">Total</span>
+        <span></span>
+      </div>
+      <div id="items-container">
+        <div class="item-row">
+          <input type="text" class="item-desc" placeholder="Descripción del servicio o producto" required>
+          <input type="number" class="item-qty" placeholder="1" value="1" min="0.01" step="0.01" required>
+          <input type="number" class="item-price" placeholder="0.00" min="0" step="0.01" required>
+          <input type="number" class="item-total" placeholder="0.00" readonly style="background:var(--light);">
+          <button type="button" class="remove-item" title="Eliminar">✕</button>
+        </div>
+      </div>
+      <button type="button" id="add-item" class="btn btn-outline" style="margin-top:1rem;font-size:.9rem;width:100%;justify-content:center;border-style:dashed;">
+        + Añadir concepto
+      </button>
+
+      <div class="totals" style="margin-top:2rem;padding-top:1.5rem;border-top:2px solid var(--border);">
+        <div style="display:flex;justify-content:flex-end;align-items:center;gap:1rem;margin-bottom:1rem;">
+          <label style="font-size:.82rem;font-weight:700;color:var(--dark);text-transform:uppercase;">IVA (%)</label>
+          <input type="number" id="tax_rate" name="tax_rate" value="16" min="0" max="100" step="0.1" style="width:80px;padding:.5rem;border:1.5px solid var(--border);border-radius:8px;font-size:.95rem;text-align:center;">
+        </div>
+        <p>Subtotal: <strong id="subtotal-display">$0.00</strong></p>
+        <p>IVA (<span id="tax-pct">16</span>%): <strong id="tax-display">$0.00</strong></p>
+        <p class="grand-total">TOTAL MXN: <strong id="total-display">$0.00</strong></p>
+      </div>
+    </div>
+
+    <!-- NOTAS -->
+    <div class="form-card">
+      <div class="form-card-header">
+        <div class="form-card-icon">📝</div>
+        <div class="form-title">Notas adicionales (opcional)</div>
+      </div>
+      <div class="form-group" style="margin-bottom:0">
+        <textarea name="notes" rows="3" placeholder="Forma de pago adicional, condiciones, agradecimiento al cliente..."></textarea>
+      </div>
+    </div>
+
+    <!-- Hidden fields -->
+    <input type="hidden" name="subtotal" id="subtotal-input">
+    <input type="hidden" name="tax_amount" id="tax-input">
+    <input type="hidden" name="total" id="total-input">
+    <input type="hidden" name="items_json" id="items-json">
+
+    <div style="display:flex;gap:1rem;justify-content:flex-end;">
+      <a href="/dashboard" class="btn btn-ghost">Cancelar</a>
+      <button type="submit" class="btn btn-primary btn-lg">Generar Factura CFDI →</button>
+    </div>
+  </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const today = new Date().toISOString().split('T')[0];
+document.getElementById('issue_date').value = today;
+const due = new Date(); due.setDate(due.getDate() + 30);
+document.getElementById('due_date').value = due.toISOString().split('T')[0];
+
+function fmt(n) { return '$' + n.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ','); }
+
+function calcTotals() {
+  let subtotal = 0;
+  document.querySelectorAll('.item-row').forEach(row => {
+    const qty = parseFloat(row.querySelector('.item-qty').value) || 0;
+    const price = parseFloat(row.querySelector('.item-price').value) || 0;
+    const line = qty * price;
+    row.querySelector('.item-total').value = line.toFixed(2);
+    subtotal += line;
+  });
+  const taxRate = parseFloat(document.getElementById('tax_rate').value) || 0;
+  const taxAmt = subtotal * taxRate / 100;
+  const total = subtotal + taxAmt;
+  document.getElementById('subtotal-display').textContent = fmt(subtotal);
+  document.getElementById('tax-pct').textContent = taxRate;
+  document.getElementById('tax-display').textContent = fmt(taxAmt);
+  document.getElementById('total-display').textContent = fmt(total);
+  document.getElementById('subtotal-input').value = subtotal.toFixed(2);
+  document.getElementById('tax-input').value = taxAmt.toFixed(2);
+  document.getElementById('total-input').value = total.toFixed(2);
+}
+
+function addItemListeners(row) {
+  row.querySelectorAll('.item-qty,.item-price').forEach(i => i.addEventListener('input', calcTotals));
+  row.querySelector('.remove-item').addEventListener('click', () => {
+    if (document.querySelectorAll('.item-row').length > 1) { row.remove(); calcTotals(); }
+  });
+}
+
+document.querySelectorAll('.item-row').forEach(addItemListeners);
+document.getElementById('tax_rate').addEventListener('input', calcTotals);
+
+document.getElementById('add-item').addEventListener('click', () => {
+  const row = document.createElement('div');
+  row.className = 'item-row';
+  row.innerHTML = `
+    <input type="text" class="item-desc" placeholder="Descripción del servicio o producto" required>
+    <input type="number" class="item-qty" placeholder="1" value="1" min="0.01" step="0.01" required>
+    <input type="number" class="item-price" placeholder="0.00" min="0" step="0.01" required>
+    <input type="number" class="item-total" placeholder="0.00" readonly style="background:var(--light);">
+    <button type="button" class="remove-item" title="Eliminar">✕</button>`;
+  document.getElementById('items-container').appendChild(row);
+  addItemListeners(row);
+  row.querySelector('.item-desc').focus();
+});
+
+document.getElementById('invoice-form').addEventListener('submit', e => {
+  const items = [];
+  document.querySelectorAll('.item-row').forEach(row => {
+    items.push({
+      description: row.querySelector('.item-desc').value,
+      qty: parseFloat(row.querySelector('.item-qty').value),
+      price: parseFloat(row.querySelector('.item-price').value),
+      total: parseFloat(row.querySelector('.item-total').value),
+    });
+  });
+  document.getElementById('items-json').value = JSON.stringify(items);
+});
+
+calcTotals();
+</script>
+{% endblock %}

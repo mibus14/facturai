@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block title %}Mi Perfil Fiscal – FacturAI{% endblock %}
+{% block content %}
+<div class="profile-wrap">
+  <div style="margin-bottom:1.5rem;">
+    <h1 style="font-size:1.6rem;font-weight:900;letter-spacing:-.5px;">Mi Perfil Fiscal</h1>
+    <p style="color:var(--gray);margin-top:.3rem;font-size:.9rem;">Configura tus datos fiscales. Se usarán como <strong>Emisor</strong> en todas tus facturas CFDI.</p>
+  </div>
+
+  {% if saved %}
+  <div class="alert alert-success">✓ Perfil guardado correctamente. Tus facturas usarán estos datos.</div>
+  {% endif %}
+
+  <form method="post" action="/perfil">
+    <div class="form-card">
+      <div class="form-card-header">
+        <div class="form-card-icon">👤</div>
+        <div class="form-title">Datos generales</div>
+      </div>
+      <div class="form-group">
+        <label>Nombre completo o razón social *</label>
+        <input type="text" name="name" value="{{ user.name }}" required>
+      </div>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" value="{{ user.email }}" disabled style="background:var(--light);color:var(--gray)">
+        <small>El email no se puede cambiar</small>
+      </div>
+    </div>
+
+    <div class="form-card">
+      <div class="form-card-header">
+        <div class="form-card-icon">🏛️</div>
+        <div class="form-title">Datos fiscales (CFDI 4.0)</div>
+      </div>
+      <div class="alert alert-info" style="margin-bottom:1.5rem;">
+        ℹ️ Estos datos aparecerán en el campo <strong>Emisor</strong> de tus facturas. Son obligatorios en CFDI 4.0.
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>RFC del emisor *</label>
+          <input type="text" name="rfc" value="{{ user.rfc or '' }}" placeholder="GACJ800101AB1" maxlength="13" style="text-transform:uppercase">
+          <small>12 caracteres (persona moral) o 13 (persona física)</small>
+        </div>
+        <div class="form-group">
+          <label>Código postal del lugar de expedición *</label>
+          <input type="text" name="cp" value="{{ user.cp or '' }}" placeholder="06600" maxlength="5">
+          <small>Requerido por el SAT en CFDI 4.0</small>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Régimen fiscal *</label>
+        <select name="regimen_fiscal">
+          {% for code, name in regimenes.items() %}
+          <option value="{{ code }}" {% if (user.regimen_fiscal or '612') == code %}selected{% endif %}>
+            {{ code }} – {{ name }}
+          </option>
+          {% endfor %}
+        </select>
+        <small>Para freelancers y profesionistas independientes, el más común es <strong>612</strong></small>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:1rem;justify-content:flex-end;">
+      <a href="/dashboard" class="btn btn-ghost">Cancelar</a>
+      <button type="submit" class="btn btn-primary">Guardar perfil fiscal</button>
+    </div>
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,225 @@
+{% extends "base.html" %}
+{% block title %}FacturAI – Facturación CFDI 4.0 para México | Cumplimiento SAT{% endblock %}
+{% block content %}
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-badge">
+    <span class="dot"></span>
+    Cumple con el SAT · CFDI 4.0 · IVA 16%
+  </div>
+  <h1>Factura electrónica<br><span class="highlight">CFDI 4.0</span> en segundos</h1>
+  <p>La plataforma de facturación más sencilla para freelancers y empresas mexicanas. RFC, régimen fiscal, forma de pago — todo en orden para el SAT.</p>
+  <div class="hero-btns">
+    <a href="/register" class="btn btn-primary btn-lg">Empezar gratis – 3 facturas sin tarjeta</a>
+    <a href="/precios" class="btn btn-outline btn-lg">Ver planes</a>
+  </div>
+  <div class="hero-trust">
+    <span>Gratis para siempre (plan básico)</span>
+    <span>Sin instalar nada</span>
+    <span>Datos campos SAT</span>
+    <span>Imprime en PDF</span>
+  </div>
+
+  <!-- Preview factura -->
+  <div class="hero-preview">
+    <div class="hero-preview-bar">
+      <span class="dot-r"></span><span class="dot-y"></span><span class="dot-g"></span>
+      <span style="margin-left:.8rem;font-size:.8rem;color:var(--gray);font-weight:500;">FacturAI · Factura A-00010001</span>
+    </div>
+    <div style="padding:2rem;display:grid;grid-template-columns:1fr 1fr;gap:2rem;text-align:left;">
+      <div>
+        <div style="font-weight:900;font-size:1.5rem;color:var(--primary);">Factur<span style="color:var(--secondary)">AI</span></div>
+        <div style="font-size:.8rem;color:var(--gray);margin-top:.2rem;">Juan García · RFC: GACJ800101AB1</div>
+        <div style="font-size:.75rem;color:var(--gray);">Régimen: Personas Físicas c/ Act. Emp. (612)</div>
+        <div style="font-size:.72rem;color:var(--gray);margin-top:.5rem;padding:.4rem .7rem;background:var(--primary-light);border-radius:6px;display:inline-block;">
+          Serie A · Folio 0001 · Fecha: 12/05/2026
+        </div>
+      </div>
+      <div style="text-align:right;">
+        <div style="font-size:.72rem;color:var(--gray);text-transform:uppercase;letter-spacing:1px;">Total</div>
+        <div style="font-size:2.8rem;font-weight:900;color:var(--primary);letter-spacing:-2px;">$8,700</div>
+        <div style="font-size:.75rem;color:var(--gray);">MXN · IVA 16% incluido</div>
+        <div style="display:inline-flex;align-items:center;gap:.4rem;background:#D1FAE5;color:#065F46;border-radius:20px;padding:.3rem .9rem;font-size:.78rem;font-weight:700;margin-top:.5rem;">
+          ✓ CFDI Válido · PUE
+        </div>
+      </div>
+      <div style="grid-column:1/-1;background:var(--light);border-radius:10px;padding:1rem;">
+        <div style="display:grid;grid-template-columns:3fr 1fr 1fr 1fr;gap:1rem;font-size:.78rem;font-weight:700;color:var(--gray);text-transform:uppercase;margin-bottom:.5rem;">
+          <span>Descripción</span><span style="text-align:right">Cant.</span><span style="text-align:right">P.U.</span><span style="text-align:right">Total</span>
+        </div>
+        <div style="display:grid;grid-template-columns:3fr 1fr 1fr 1fr;gap:1rem;font-size:.85rem;padding:.5rem 0;border-bottom:1px solid var(--border);">
+          <span>Desarrollo de sitio web</span><span style="text-align:right">1</span><span style="text-align:right">$6,500</span><span style="text-align:right;font-weight:700">$6,500</span>
+        </div>
+        <div style="display:grid;grid-template-columns:3fr 1fr 1fr 1fr;gap:1rem;font-size:.85rem;padding:.5rem 0;">
+          <span>Mantenimiento mensual</span><span style="text-align:right">2</span><span style="text-align:right">$1,000</span><span style="text-align:right;font-weight:700">$2,000</span>
+        </div>
+        <div style="text-align:right;padding-top:.8rem;border-top:1px solid var(--border);margin-top:.5rem;font-size:.85rem;color:var(--gray);">
+          Subtotal: <strong style="color:var(--dark)">$7,500</strong> · IVA 16%: <strong style="color:var(--dark)">$1,200</strong> · <strong style="color:var(--primary);font-size:1rem;">Total: $8,700 MXN</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="features">
+  <h2 class="section-title">Todo lo que necesitas para facturar en México</h2>
+  <p class="section-sub">Diseñado para cumplir con el SAT desde el primer clic. Sin contadores, sin complicaciones.</p>
+  <div class="features-grid">
+    <div class="feature-card">
+      <div class="feature-icon">🧾</div>
+      <h3>CFDI 4.0 completo</h3>
+      <p>RFC emisor y receptor, régimen fiscal, uso del CFDI, forma y método de pago. Todos los campos que el SAT requiere.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">⚡</div>
+      <h3>Factura en 30 segundos</h3>
+      <p>Rellena los datos del cliente, añade conceptos y listo. IVA 16% calculado automáticamente.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🖨️</div>
+      <h3>PDF profesional</h3>
+      <p>Imprime o descarga cada factura como PDF con formato oficial. Aspecto 100% profesional ante tus clientes.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🤖</div>
+      <h3>Asistente IA "Max"</h3>
+      <p>¿Dudas sobre qué uso CFDI elegir? ¿Cómo llenar el régimen fiscal? Max te responde al instante.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">📊</div>
+      <h3>Dashboard de control</h3>
+      <p>Ve todas tus facturas, importes cobrados y pendientes en pesos mexicanos desde un solo panel.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🔒</div>
+      <h3>Tus datos seguros</h3>
+      <p>Información encriptada y guardada de forma segura. Cumplimos con las mejores prácticas de seguridad.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SAT COMPLIANCE SECTION -->
+<section class="sat-section">
+  <div class="sat-inner">
+    <h2 class="section-title" style="color:white;">Cumplimiento total con el SAT</h2>
+    <p class="section-sub" style="color:rgba(255,255,255,.7);">FacturAI incorpora todos los campos obligatorios del CFDI 4.0</p>
+    <div class="sat-grid">
+      <div>
+        <ul class="sat-list">
+          <li><span class="sat-check">✓</span> RFC del emisor y receptor (CFDI 4.0 obligatorio)</li>
+          <li><span class="sat-check">✓</span> Régimen fiscal del emisor y receptor</li>
+          <li><span class="sat-check">✓</span> Código postal del lugar de expedición</li>
+          <li><span class="sat-check">✓</span> Uso del CFDI (G01, G03, I01, D01, S01, P01…)</li>
+          <li><span class="sat-check">✓</span> Forma de pago (efectivo, transferencia, tarjeta…)</li>
+          <li><span class="sat-check">✓</span> Método de pago (PUE / PPD)</li>
+          <li><span class="sat-check">✓</span> IVA 16% calculado automáticamente</li>
+          <li><span class="sat-check">✓</span> Moneda MXN con serie y folio</li>
+        </ul>
+        <div class="sat-note">
+          ⚠️ <strong>Nota:</strong> FacturAI genera la estructura y datos correctos para CFDI 4.0.
+          El timbrado fiscal ante el SAT requiere un PAC autorizado. Próximamente integración con PACs certificados.
+        </div>
+      </div>
+      <div class="sat-badges">
+        <div class="sat-badge">
+          <div class="badge-icon">📋</div>
+          <div class="badge-title">CFDI 4.0</div>
+          <div class="badge-desc">Versión vigente SAT</div>
+        </div>
+        <div class="sat-badge">
+          <div class="badge-icon">💰</div>
+          <div class="badge-title">IVA 16%</div>
+          <div class="badge-desc">Tasa estándar México</div>
+        </div>
+        <div class="sat-badge">
+          <div class="badge-icon">🔖</div>
+          <div class="badge-title">RFC Validado</div>
+          <div class="badge-desc">Formato SAT</div>
+        </div>
+        <div class="sat-badge">
+          <div class="badge-icon">📄</div>
+          <div class="badge-title">PDF Oficial</div>
+          <div class="badge-desc">Representación impresa</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING PREVIEW -->
+<section class="pricing">
+  <h2 class="section-title">Planes simples y transparentes</h2>
+  <p class="section-sub">Empieza gratis. Crece cuando lo necesites. Sin letra pequeña.</p>
+  <div class="pricing-grid">
+    <div class="plan-card">
+      <div class="plan-name">Gratis</div>
+      <div class="plan-price">$0<span>/mes</span></div>
+      <ul class="plan-features">
+        <li>3 facturas por mes</li>
+        <li>PDF descargable</li>
+        <li>Campos CFDI 4.0</li>
+        <li>Asistente Max IA</li>
+      </ul>
+      <a href="/register" class="btn btn-outline" style="width:100%;justify-content:center">Empezar gratis</a>
+    </div>
+    <div class="plan-card featured">
+      <span class="plan-badge">MÁS POPULAR</span>
+      <div class="plan-name">Básico</div>
+      <div class="plan-price">$199<span>/mes</span></div>
+      <ul class="plan-features">
+        <li>Facturas ilimitadas</li>
+        <li>PDF profesional</li>
+        <li>Numeración automática</li>
+        <li>Historial completo</li>
+        <li>Soporte por email</li>
+      </ul>
+      <a href="/register" class="btn btn-primary" style="width:100%;justify-content:center">Empezar ahora</a>
+    </div>
+    <div class="plan-card">
+      <div class="plan-name">Pro</div>
+      <div class="plan-price">$399<span>/mes</span></div>
+      <ul class="plan-features">
+        <li>Todo lo del Básico</li>
+        <li>Múltiples empresas</li>
+        <li>Exportar a CSV/Excel</li>
+        <li>Acceso API</li>
+        <li>Soporte prioritario 24h</li>
+      </ul>
+      <a href="/register" class="btn btn-outline" style="width:100%;justify-content:center">Empezar Pro</a>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIOS -->
+<section class="testimonials">
+  <h2 class="section-title">Lo que dicen nuestros usuarios</h2>
+  <p class="section-sub">Freelancers y empresas de toda la República Mexicana</p>
+  <div class="testimonials-grid">
+    <div class="testimonial-card">
+      <div class="stars">★★★★★</div>
+      <p class="testimonial-text">"Por fin una herramienta que entiende el SAT mexicano. El RFC, el régimen fiscal y el uso CFDI ya vienen explicados. ¡Genial!"</p>
+      <div class="testimonial-author">María González <span class="testimonial-role">– Diseñadora freelance, CDMX</span></div>
+    </div>
+    <div class="testimonial-card">
+      <div class="stars">★★★★★</div>
+      <p class="testimonial-text">"Max el asistente me resolvió en 2 minutos la duda del método de pago PUE vs PPD que llevaba días sin entender."</p>
+      <div class="testimonial-author">Carlos Ramírez <span class="testimonial-role">– Consultor IT, Monterrey</span></div>
+    </div>
+    <div class="testimonial-card">
+      <div class="stars">★★★★★</div>
+      <p class="testimonial-text">"Antes tardaba media hora con Excel y aun así me equivocaba en el IVA. Ahora creo facturas CFDI en 1 minuto."</p>
+      <div class="testimonial-author">Ana Pérez <span class="testimonial-role">– Fotógrafa, Guadalajara</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA FINAL -->
+<section class="cta-banner">
+  <h2>Empieza a facturar con el SAT hoy</h2>
+  <p>Sin tarjeta de crédito. Sin complicaciones. Cumple con el SAT desde el primer día.</p>
+  <a href="/register" class="btn btn-secondary btn-lg">Crear mi cuenta gratis</a>
+</section>
+
+{% endblock %}
