@@ -33,6 +33,10 @@
   <div class="alert alert-success">✓ ¡Suscripción activada! Ya puedes crear facturas ilimitadas.</div>
   {% endif %}
 
+  {% if request.query_params.get('cancelled') %}
+  <div class="alert alert-warning">Tu suscripción fue cancelada. Conservas el acceso hasta fin de período.</div>
+  {% endif %}
+
   <div class="stats">
     <div class="stat-card">
       <div class="label">Facturas creadas</div>
@@ -47,9 +51,11 @@
       <div class="value" style="font-size:1.4rem;margin-top:.3rem;">{{ user.plan.capitalize() }}</div>
     </div>
     <div class="stat-card">
-      <div class="label">Estado suscripción</div>
-      <div class="value" style="font-size:1.2rem;margin-top:.3rem;color:{% if user.subscription_status == 'active' %}var(--secondary){% else %}var(--gray){% endif %}">
-        {{ 'Activa' if user.subscription_status == 'active' else 'Sin suscripción' }}
+      <div class="label">Suscripción</div>
+      <div class="value" style="font-size:1.1rem;margin-top:.3rem;color:{% if user.subscription_status == 'active' %}var(--secondary){% else %}var(--gray){% endif %}">
+        {% if user.subscription_status == 'active' %}Activa
+        {% elif user.subscription_status == 'cancelled' %}Cancelada
+        {% else %}Sin plan{% endif %}
       </div>
     </div>
   </div>
@@ -57,9 +63,16 @@
   <div class="card">
     <div class="card-header">
       Mis facturas recientes
-      {% if invoices %}
-      <span style="color:var(--gray);font-size:.85rem;font-weight:400;">{{ invoices|length }} facturas</span>
-      {% endif %}
+      <div style="display:flex;align-items:center;gap:.75rem;">
+        {% if invoices %}
+        <span style="color:var(--gray);font-size:.85rem;font-weight:400;">
+          Mostrando {{ invoices|length }} de {{ total_invoices }}
+        </span>
+        {% endif %}
+        {% if total_invoices > 10 %}
+        <a href="/facturas" style="font-size:.82rem;color:var(--primary);font-weight:600;">Ver todas →</a>
+        {% endif %}
+      </div>
     </div>
     {% if invoices %}
     <table>
@@ -67,9 +80,9 @@
         <tr>
           <th>Número</th>
           <th>Cliente</th>
-          <th>RFC Receptor</th>
+          <th>RFC</th>
           <th>Fecha</th>
-          <th>Total (MXN)</th>
+          <th>Total MXN</th>
           <th>Estado</th>
           <th></th>
         </tr>
@@ -77,23 +90,39 @@
       <tbody>
         {% for inv in invoices %}
         <tr>
-          <td><strong style="font-family:monospace;font-size:.9rem;">{{ inv.invoice_number }}</strong></td>
+          <td><strong style="font-family:monospace;font-size:.88rem;">{{ inv.invoice_number }}</strong></td>
           <td>{{ inv.client_name }}</td>
-          <td style="font-family:monospace;font-size:.82rem;color:var(--gray);">{{ inv.rfc_receptor or '—' }}</td>
+          <td style="font-family:monospace;font-size:.8rem;color:var(--gray);">{{ inv.rfc_receptor or '—' }}</td>
           <td>{{ inv.issue_date }}</td>
           <td><strong>${{ "{:,.2f}".format(inv.total) }}</strong></td>
-          <td><span class="badge badge-{{ inv.status }}">{{ inv.status.upper() }}</span></td>
+          <td>
+            <span class="badge badge-{{ inv.status }}">
+              {% if inv.status == 'paid' %}✓ PAGADA
+              {% elif inv.status == 'sent' %}ENVIADA
+              {% elif inv.status == 'cancelled' %}CANCELADA
+              {% else %}{{ inv.status.upper() }}{% endif %}
+            </span>
+          </td>
           <td><a href="/facturas/{{ inv.id }}" class="btn btn-ghost" style="padding:.3rem .8rem;font-size:.82rem;">Ver</a></td>
         </tr>
         {% endfor %}
       </tbody>
     </table>
+    {% if total_invoices > 10 %}
+    <div style="padding:1rem 1.4rem;border-top:1px solid var(--border);text-align:center;">
+      <a href="/facturas" class="btn btn-ghost btn-sm">Ver todas las facturas ({{ total_invoices }}) →</a>
+    </div>
+    {% endif %}
     {% else %}
-    <div style="text-align:center;padding:4rem;color:var(--gray);">
+    <div style="text-align:center;padding:4rem 2rem;color:var(--gray);">
       <div style="font-size:4rem;margin-bottom:1rem;">🧾</div>
-      <p style="font-size:1.1rem;font-weight:600;margin-bottom:.5rem;">Aún no tienes facturas</p>
-      <p style="font-size:.9rem;">Crea tu primera factura CFDI 4.0 en menos de un minuto</p>
+      <p style="font-size:1.1rem;font-weight:600;margin-bottom:.5rem;color:var(--dark);">Aún no tienes facturas</p>
+      <p style="font-size:.9rem;max-width:360px;margin:0 auto .5rem;">Crea tu primera factura CFDI 4.0 en menos de un minuto</p>
+      {% if user.plan == 'free' and user.invoices_created >= 1 %}
+      <a href="/precios" class="btn btn-primary" style="margin-top:1.5rem;">Ver planes →</a>
+      {% else %}
       <a href="/facturas/nueva" class="btn btn-primary" style="margin-top:1.5rem;">Crear primera factura CFDI</a>
+      {% endif %}
     </div>
     {% endif %}
   </div>

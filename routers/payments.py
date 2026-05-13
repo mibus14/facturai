@@ -67,6 +67,37 @@ def payment_success(user=Depends(get_current_user)):
     return RedirectResponse("/dashboard?upgraded=1", status_code=302)
 
 
+@router.post("/cancel")
+async def cancel_subscription(user=Depends(get_current_user)):
+    uid = int(user["sub"])
+    db = get_db()
+    user_row = db.execute(
+        "SELECT mp_subscription_id, plan FROM users WHERE id=?", (uid,)
+    ).fetchone()
+    db.close()
+
+    sub_id = user_row["mp_subscription_id"] if user_row else None
+    if sub_id and user_row["plan"] != "free":
+        try:
+            async with httpx.AsyncClient(timeout=15) as client:
+                await client.put(
+                    f"{MP_API}/preapproval/{sub_id}",
+                    headers=_mp_headers(),
+                    json={"status": "cancelled"},
+                )
+        except Exception:
+            pass
+
+    db = get_db()
+    db.execute(
+        "UPDATE users SET plan='free', subscription_status='cancelled', mp_subscription_id=NULL WHERE id=?",
+        (uid,),
+    )
+    db.commit()
+    db.close()
+    return RedirectResponse("/dashboard?cancelled=1", status_code=302)
+
+
 def _verify_mp_signature(request: Request, body: bytes) -> bool:
     if not MP_WEBHOOK_SECRET:
         return True

@@ -168,8 +168,10 @@ _SCHEMA_PG = [
         plan TEXT DEFAULT 'free',
         stripe_customer_id TEXT,
         stripe_subscription_id TEXT,
+        mp_subscription_id TEXT,
         subscription_status TEXT DEFAULT 'inactive',
         invoices_created INTEGER DEFAULT 0,
+        is_admin INTEGER DEFAULT 0,
         created_at TEXT DEFAULT CURRENT_TIMESTAMP
     )""",
     """CREATE TABLE IF NOT EXISTS invoices (

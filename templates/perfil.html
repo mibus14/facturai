@@ -39,7 +39,8 @@
       <div class="form-row">
         <div class="form-group">
           <label>RFC del emisor *</label>
-          <input type="text" name="rfc" value="{{ user.rfc or '' }}" placeholder="GACJ800101AB1" maxlength="13" style="text-transform:uppercase">
+          <input type="text" name="rfc" id="rfc-input" value="{{ user.rfc or '' }}"
+                 placeholder="GACJ800101AB1" maxlength="13" style="text-transform:uppercase">
           <small>12 caracteres (persona moral) o 13 (persona física)</small>
         </div>
         <div class="form-group">
@@ -66,5 +67,80 @@
       <button type="submit" class="btn btn-primary">Guardar perfil fiscal</button>
     </div>
   </form>
+
+  <!-- Plan & Subscription -->
+  <div class="form-card" style="margin-top:1.5rem;">
+    <div class="form-card-header">
+      <div class="form-card-icon">💎</div>
+      <div class="form-title">Mi suscripción</div>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;">
+      <div>
+        <div style="font-size:.78rem;color:var(--gray);font-weight:700;text-transform:uppercase;letter-spacing:.4px;">Plan actual</div>
+        <div style="font-size:1.3rem;font-weight:900;color:var(--primary);margin-top:.2rem;">
+          {{ user.plan.capitalize() }}
+          {% if user.subscription_status == 'active' %}
+          <span style="font-size:.7rem;background:var(--secondary);color:white;padding:.2rem .6rem;border-radius:50px;margin-left:.4rem;font-weight:700;vertical-align:middle;">ACTIVA</span>
+          {% endif %}
+        </div>
+        <div style="font-size:.82rem;color:var(--gray);margin-top:.3rem;">
+          {% if user.plan == 'free' %}
+          Plan gratuito — 1 factura de prueba
+          {% elif user.plan == 'basic' %}
+          $99/mes MXN — Facturas ilimitadas
+          {% elif user.plan == 'pro' %}
+          $199/mes MXN — Pro completo
+          {% endif %}
+        </div>
+      </div>
+      <div style="display:flex;gap:.6rem;flex-wrap:wrap;">
+        {% if user.plan == 'free' %}
+        <a href="/precios" class="btn btn-primary btn-sm">Actualizar a Básico →</a>
+        {% else %}
+        <a href="/precios" class="btn btn-ghost btn-sm">Ver planes</a>
+        {% if user.subscription_status == 'active' %}
+        <button onclick="document.getElementById('cancel-modal').style.display='flex'" class="btn btn-ghost btn-sm" style="color:#DC2626;border-color:#FECACA;">
+          Cancelar suscripción
+        </button>
+        {% endif %}
+        {% endif %}
+      </div>
+    </div>
+  </div>
 </div>
+
+<!-- Cancel confirmation modal -->
+<div id="cancel-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:999;align-items:center;justify-content:center;">
+  <div style="background:white;border-radius:16px;padding:2rem;max-width:400px;width:90%;text-align:center;box-shadow:0 24px 64px rgba(0,0,0,.2);">
+    <div style="font-size:2.5rem;margin-bottom:1rem;">⚠️</div>
+    <h3 style="font-size:1.2rem;font-weight:800;margin-bottom:.5rem;">¿Cancelar suscripción?</h3>
+    <p style="color:var(--gray);font-size:.9rem;margin-bottom:1.5rem;">
+      Perderás acceso a facturas ilimitadas al terminar tu período de facturación actual.
+      Esta acción se puede revertir suscribiéndote de nuevo.
+    </p>
+    <div style="display:flex;gap:.75rem;justify-content:center;">
+      <button onclick="document.getElementById('cancel-modal').style.display='none'" class="btn btn-primary">
+        Mantener suscripción
+      </button>
+      <form method="post" action="/payments/cancel" style="display:inline;">
+        <button type="submit" class="btn btn-ghost" style="color:#DC2626;">Sí, cancelar</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.getElementById('cancel-modal').addEventListener('click', function(e) {
+  if (e.target === this) this.style.display = 'none';
+});
+const rfcInput = document.getElementById('rfc-input');
+if (rfcInput) {
+  rfcInput.addEventListener('input', function() {
+    this.value = this.value.toUpperCase();
+  });
+}
+</script>
 {% endblock %}

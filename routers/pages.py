@@ -1,15 +1,14 @@
+import json
+import os
 from fastapi import APIRouter, Request, Depends, Form, HTTPException
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from database import get_db
 from auth import hash_password, verify_password, create_token, get_current_user, get_current_user_optional
-import os
 
 router = APIRouter()
 _BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 templates = Jinja2Templates(directory=os.path.join(_BASE, "templates"))
-
-STRIPE_PK = os.getenv("STRIPE_PUBLISHABLE_KEY", "")
 
 REGIMENES = {
     "601": "General de Ley Personas Morales",
@@ -56,9 +55,21 @@ FORMAS_PAGO = {
 }
 
 
+def _refresh_session(response, jwt_payload, db_user: dict):
+    """Silently refresh the session cookie when the DB plan differs from the JWT plan."""
+    if jwt_payload and jwt_payload.get("plan") != db_user.get("plan"):
+        new_token = create_token({
+            "sub": str(db_user["id"]),
+            "email": db_user["email"],
+            "name": db_user["name"],
+            "plan": db_user["plan"],
+        })
+        response.set_cookie("session", new_token, httponly=True, max_age=60 * 60 * 24 * 7)
+
+
 @router.get("/", response_class=HTMLResponse)
 def landing(request: Request, user=Depends(get_current_user_optional)):
-    return templates.TemplateResponse(request, "landing.html", {"user": user, "stripe_pk": STRIPE_PK})
+    return templates.TemplateResponse(request, "landing.html", {"user": user})
 
 
 @router.get("/register", response_class=HTMLResponse)
@@ -76,6 +87,10 @@ def register(
     regimen_fiscal: str = Form("612"),
     cp: str = Form(""),
 ):
+    if len(password) < 8:
+        return templates.TemplateResponse(request, "register.html", {
+            "error": "La contraseña debe tener al menos 8 caracteres.", "regimenes": REGIMENES
+        })
     db = get_db()
     existing = db.execute("SELECT id FROM users WHERE email=?", (email,)).fetchone()
     if existing:
@@ -135,11 +150,17 @@ def dashboard(request: Request, user=Depends(get_current_user)):
     invoices = db.execute(
         "SELECT * FROM invoices WHERE user_id=? ORDER BY created_at DESC LIMIT 10", (uid,)
     ).fetchall()
+    total_invoices = db.execute(
+        "SELECT COUNT(*) FROM invoices WHERE user_id=?", (uid,)
+    ).fetchone()[0]
     db.close()
-    return templates.TemplateResponse(request, "dashboard.html", {
+    resp = templates.TemplateResponse(request, "dashboard.html", {
         "user": dict(user_row),
         "invoices": [dict(i) for i in invoices],
+        "total_invoices": total_invoices,
     })
+    _refresh_session(resp, user, dict(user_row))
+    return resp
 
 
 @router.get("/perfil", response_class=HTMLResponse)
@@ -148,9 +169,11 @@ def perfil_page(request: Request, user=Depends(get_current_user)):
     db = get_db()
     user_row = db.execute("SELECT * FROM users WHERE id=?", (uid,)).fetchone()
     db.close()
-    return templates.TemplateResponse(request, "perfil.html", {
+    resp = templates.TemplateResponse(request, "perfil.html", {
         "user": dict(user_row), "regimenes": REGIMENES, "saved": False,
     })
+    _refresh_session(resp, user, dict(user_row))
+    return resp
 
 
 @router.post("/perfil")
@@ -171,9 +194,37 @@ def perfil_save(
     db.commit()
     user_row = db.execute("SELECT * FROM users WHERE id=?", (uid,)).fetchone()
     db.close()
-    return templates.TemplateResponse(request, "perfil.html", {
+    resp = templates.TemplateResponse(request, "perfil.html", {
         "user": dict(user_row), "regimenes": REGIMENES, "saved": True,
     })
+    _refresh_session(resp, user, dict(user_row))
+    return resp
+
+
+@router.get("/facturas", response_class=HTMLResponse)
+def all_invoices(request: Request, q: str = "", user=Depends(get_current_user)):
+    uid = int(user["sub"])
+    db = get_db()
+    user_row = db.execute("SELECT * FROM users WHERE id=?", (uid,)).fetchone()
+    if q:
+        invoices = db.execute(
+            """SELECT * FROM invoices WHERE user_id=?
+               AND (client_name LIKE ? OR invoice_number LIKE ? OR rfc_receptor LIKE ?)
+               ORDER BY created_at DESC""",
+            (uid, f"%{q}%", f"%{q}%", f"%{q}%"),
+        ).fetchall()
+    else:
+        invoices = db.execute(
+            "SELECT * FROM invoices WHERE user_id=? ORDER BY created_at DESC", (uid,)
+        ).fetchall()
+    db.close()
+    resp = templates.TemplateResponse(request, "facturas.html", {
+        "user": dict(user_row),
+        "invoices": [dict(i) for i in invoices],
+        "q": q,
+    })
+    _refresh_session(resp, user, dict(user_row))
+    return resp
 
 
 @router.get("/facturas/nueva", response_class=HTMLResponse)
@@ -216,7 +267,6 @@ def crear_factura(
     total: float = Form(...),
     notes: str = Form(""),
 ):
-    import json
     uid = int(user["sub"])
     db = get_db()
     user_row = db.execute("SELECT * FROM users WHERE id=?", (uid,)).fetchone()
@@ -256,17 +306,45 @@ def ver_factura(inv_id: int, request: Request, user=Depends(get_current_user)):
     db.close()
     if not inv:
         raise HTTPException(404)
-    import json
     items = json.loads(inv["items"])
-    inv_dict = dict(inv)
     return templates.TemplateResponse(request, "ver_factura.html", {
-        "inv": inv_dict,
+        "inv": dict(inv),
         "items": items,
         "user": dict(user_row),
         "regimenes": REGIMENES,
         "usos_cfdi": USOS_CFDI,
         "formas_pago": FORMAS_PAGO,
     })
+
+
+@router.post("/facturas/{inv_id}/status")
+def update_invoice_status(inv_id: int, status: str = Form(...), user=Depends(get_current_user)):
+    uid = int(user["sub"])
+    if status not in ("sent", "paid", "draft", "cancelled"):
+        raise HTTPException(400, "Estado inválido")
+    db = get_db()
+    inv = db.execute("SELECT id FROM invoices WHERE id=? AND user_id=?", (inv_id, uid)).fetchone()
+    if not inv:
+        db.close()
+        raise HTTPException(404)
+    db.execute("UPDATE invoices SET status=? WHERE id=? AND user_id=?", (status, inv_id, uid))
+    db.commit()
+    db.close()
+    return RedirectResponse(f"/facturas/{inv_id}", status_code=302)
+
+
+@router.post("/facturas/{inv_id}/delete")
+def delete_invoice(inv_id: int, user=Depends(get_current_user)):
+    uid = int(user["sub"])
+    db = get_db()
+    inv = db.execute("SELECT id FROM invoices WHERE id=? AND user_id=?", (inv_id, uid)).fetchone()
+    if not inv:
+        db.close()
+        raise HTTPException(404)
+    db.execute("DELETE FROM invoices WHERE id=? AND user_id=?", (inv_id, uid))
+    db.commit()
+    db.close()
+    return RedirectResponse("/facturas?deleted=1", status_code=302)
 
 
 @router.get("/precios", response_class=HTMLResponse)
@@ -279,6 +357,9 @@ def precios(request: Request, upgrade: int = 0, user=Depends(get_current_user_op
         db.close()
         if user_row:
             user_data = dict(user_row)
-    return templates.TemplateResponse(request, "precios.html", {
-        "user": user_data, "stripe_pk": STRIPE_PK, "upgrade": upgrade,
+    resp = templates.TemplateResponse(request, "precios.html", {
+        "user": user_data, "upgrade": upgrade,
     })
+    if user and user_data and isinstance(user_data, dict):
+        _refresh_session(resp, user, user_data)
+    return resp

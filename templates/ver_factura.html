@@ -3,8 +3,22 @@
 {% block content %}
 <div class="invoice-view">
   <div class="no-print" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;flex-wrap:wrap;gap:.8rem;">
-    <a href="/dashboard" class="btn btn-ghost">← Volver al dashboard</a>
-    <button onclick="window.print()" class="btn btn-primary">🖨️ Imprimir / PDF</button>
+    <a href="/facturas" class="btn btn-ghost">← Mis facturas</a>
+    <div style="display:flex;gap:.6rem;flex-wrap:wrap;">
+      {% if inv.status != 'paid' %}
+      <form method="post" action="/facturas/{{ inv.id }}/status" style="display:inline;">
+        <input type="hidden" name="status" value="paid">
+        <button type="submit" class="btn btn-secondary btn-sm">✓ Marcar como pagada</button>
+      </form>
+      {% else %}
+      <form method="post" action="/facturas/{{ inv.id }}/status" style="display:inline;">
+        <input type="hidden" name="status" value="sent">
+        <button type="submit" class="btn btn-ghost btn-sm">↩ Marcar como enviada</button>
+      </form>
+      {% endif %}
+      <button onclick="window.print()" class="btn btn-primary btn-sm">🖨️ Imprimir / PDF</button>
+      <button onclick="confirmDelete()" class="btn btn-danger btn-sm no-print">🗑️ Eliminar</button>
+    </div>
   </div>
 
   <div class="invoice-paper">
@@ -28,7 +42,12 @@
         {% if inv.due_date %}<div class="inv-meta-row">Vencimiento: {{ inv.due_date }}</div>{% endif %}
         <div class="inv-meta-row">Moneda: {{ inv.moneda or 'MXN' }}</div>
         <div style="margin-top:.6rem;">
-          <span class="badge badge-{{ inv.status }}">{{ inv.status.upper() }}</span>
+          <span class="badge badge-{{ inv.status }}">
+            {% if inv.status == 'paid' %}✓ PAGADA
+            {% elif inv.status == 'sent' %}ENVIADA
+            {% elif inv.status == 'cancelled' %}CANCELADA
+            {% else %}{{ inv.status.upper() }}{% endif %}
+          </span>
         </div>
       </div>
     </div>
@@ -90,7 +109,7 @@
       </tbody>
     </table>
 
-    <!-- TOTALES E IMPUESTOS -->
+    <!-- TOTALES -->
     <div class="inv-totals">
       <p>Subtotal: <strong>${{ "%.2f"|format(inv.subtotal) }} MXN</strong></p>
       {% if inv.tax_rate and inv.tax_rate > 0 %}
@@ -112,8 +131,34 @@
     </div>
 
     <div class="inv-bottom">
-      Generado con FacturAI · Facturación CFDI 4.0 para México · facturai.mx
+      Generado con FacturAI · Facturación CFDI 4.0 para México
     </div>
   </div>
 </div>
+
+<!-- Delete confirmation modal -->
+<div id="delete-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:999;align-items:center;justify-content:center;">
+  <div style="background:white;border-radius:16px;padding:2rem;max-width:380px;width:90%;text-align:center;box-shadow:0 24px 64px rgba(0,0,0,.2);">
+    <div style="font-size:2.5rem;margin-bottom:1rem;">🗑️</div>
+    <h3 style="font-size:1.2rem;font-weight:800;margin-bottom:.5rem;">¿Eliminar factura?</h3>
+    <p style="color:var(--gray);font-size:.9rem;margin-bottom:1.5rem;">Esta acción no se puede deshacer. La factura <strong>{{ inv.invoice_number }}</strong> será eliminada permanentemente.</p>
+    <div style="display:flex;gap:.75rem;justify-content:center;">
+      <button onclick="document.getElementById('delete-modal').style.display='none'" class="btn btn-ghost">Cancelar</button>
+      <form method="post" action="/facturas/{{ inv.id }}/delete" style="display:inline;">
+        <button type="submit" class="btn btn-danger">Sí, eliminar</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function confirmDelete() {
+  document.getElementById('delete-modal').style.display = 'flex';
+}
+document.getElementById('delete-modal').addEventListener('click', function(e) {
+  if (e.target === this) this.style.display = 'none';
+});
+</script>
 {% endblock %}

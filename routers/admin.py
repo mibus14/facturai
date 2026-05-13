@@ -116,7 +116,7 @@ def get_stats(admin=Depends(_get_admin)):
     ).fetchone()
     db.close()
 
-    monthly_revenue = (basic_subs * 199) + (pro_subs * 399)
+    monthly_revenue = (basic_subs * 99) + (pro_subs * 199)
     return {
         "total_users": total_users,
         "active_subscriptions": active_subs,

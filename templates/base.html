@@ -9,129 +9,6 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 {% block head %}{% endblock %}
-<style>
-/* ── NAV MEJORADO ── */
-nav {
-  position: sticky; top: 0; z-index: 100;
-  background: rgba(255,255,255,0.92);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border-bottom: 1px solid var(--border);
-  padding: 0 2rem;
-  display: flex; align-items: center; justify-content: space-between;
-  height: 62px;
-}
-.nav-brand {
-  display: flex; align-items: center; gap: .5rem;
-  font-weight: 900; font-size: 1.2rem; color: var(--dark);
-  text-decoration: none; letter-spacing: -.02em;
-}
-.nav-brand span { color: var(--primary); }
-.nav-logo {
-  width: 32px; height: 32px; background: var(--primary);
-  color: white; border-radius: 8px;
-  display: flex; align-items: center; justify-content: center;
-  font-weight: 900; font-size: 1rem;
-}
-.nav-links {
-  display: flex; align-items: center; gap: .25rem;
-}
-.nav-links a {
-  padding: 7px 14px; border-radius: 8px; font-size: .9rem;
-  font-weight: 500; color: var(--gray); text-decoration: none;
-  transition: background .15s, color .15s;
-}
-.nav-links a:hover { background: var(--light); color: var(--dark); }
-.nav-links a.nav-active { color: var(--primary); font-weight: 600; }
-.nav-links .btn-sm { padding: 8px 16px !important; font-size: .88rem !important; }
-.nav-divider {
-  width: 1px; height: 22px; background: var(--border); margin: 0 6px;
-}
-/* User chip */
-.nav-user-chip {
-  display: flex; align-items: center; gap: 8px;
-  padding: 5px 12px 5px 6px;
-  background: var(--light); border-radius: 99px;
-  border: 1px solid var(--border);
-}
-.nav-avatar {
-  width: 26px; height: 26px; border-radius: 50%;
-  background: var(--primary); color: white;
-  display: flex; align-items: center; justify-content: center;
-  font-size: .75rem; font-weight: 800; text-transform: uppercase;
-  flex-shrink: 0;
-}
-.nav-user-name { font-size: .82rem; font-weight: 600; color: var(--dark); max-width: 110px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.nav-logout {
-  padding: 7px 12px; border-radius: 8px; font-size: .85rem;
-  font-weight: 500; color: var(--gray); text-decoration: none;
-  transition: background .15s, color .15s; border: 1px solid var(--border);
-  margin-left: 4px;
-}
-.nav-logout:hover { background: #FEF2F2; color: #DC2626; border-color: #FECACA; }
-/* Hamburger */
-.nav-toggle {
-  display: none; flex-direction: column; gap: 5px;
-  background: none; border: none; cursor: pointer;
-  padding: 8px; border-radius: 8px;
-}
-.nav-toggle span {
-  display: block; width: 22px; height: 2px;
-  background: var(--dark); border-radius: 2px;
-  transition: transform .25s, opacity .25s;
-}
-.nav-toggle.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
-.nav-toggle.open span:nth-child(2) { opacity: 0; }
-.nav-toggle.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
-
-/* ── MOBILE MENU ── */
-.mobile-menu {
-  display: none; position: fixed; inset: 62px 0 0 0;
-  background: white; z-index: 99; overflow-y: auto;
-  padding: 1.5rem 1.25rem 2rem; flex-direction: column; gap: .5rem;
-  opacity: 0; transform: translateY(-8px);
-  transition: opacity .2s, transform .2s;
-  pointer-events: none;
-}
-.mobile-menu.open { opacity: 1; transform: translateY(0); pointer-events: auto; }
-.mobile-menu-section {
-  font-size: .72rem; font-weight: 700; color: var(--gray);
-  text-transform: uppercase; letter-spacing: .08em;
-  padding: 1rem 4px 4px; margin-top: .5rem;
-}
-.mobile-menu a {
-  display: flex; align-items: center; gap: 10px;
-  padding: 12px 14px; border-radius: 10px;
-  text-decoration: none; font-size: .95rem; font-weight: 500;
-  color: var(--dark); transition: background .15s;
-}
-.mobile-menu a:hover { background: var(--light); }
-.mobile-menu a .m-icon { font-size: 1.1rem; width: 24px; text-align: center; }
-.mobile-menu .btn { justify-content: center; margin-top: .5rem; }
-.mobile-menu-user {
-  display: flex; align-items: center; gap: 10px;
-  padding: 14px; background: var(--light); border-radius: 12px;
-  margin-bottom: .5rem;
-}
-.mobile-menu-user .nav-avatar { width: 38px; height: 38px; font-size: .95rem; }
-.mobile-menu-user-info { line-height: 1.3; }
-.mobile-menu-user-name { font-weight: 700; font-size: .95rem; color: var(--dark); }
-.mobile-menu-user-email { font-size: .78rem; color: var(--gray); }
-.mobile-divider { height: 1px; background: var(--border); margin: .5rem 0; }
-.mobile-logout {
-  display: flex; align-items: center; gap: 10px;
-  padding: 12px 14px; border-radius: 10px;
-  text-decoration: none; font-size: .95rem; font-weight: 500;
-  color: #DC2626; transition: background .15s;
-}
-.mobile-logout:hover { background: #FEF2F2; }
-
-@media (max-width: 768px) {
-  .nav-links { display: none; }
-  .nav-toggle { display: flex; }
-  .mobile-menu { display: flex; }
-}
-</style>
 </head>
 <body>
 
@@ -147,7 +24,8 @@ nav {
     <a href="/precios" {% if request.url.path == '/precios' %}class="nav-active"{% endif %}>Precios</a>
     {% if user %}
       <a href="/dashboard" {% if request.url.path == '/dashboard' %}class="nav-active"{% endif %}>Dashboard</a>
-      <a href="/perfil" {% if request.url.path == '/perfil' %}class="nav-active"{% endif %}>Mi perfil fiscal</a>
+      <a href="/facturas" {% if request.url.path == '/facturas' %}class="nav-active"{% endif %}>Mis facturas</a>
+      <a href="/perfil" {% if request.url.path == '/perfil' %}class="nav-active"{% endif %}>Perfil fiscal</a>
       <div class="nav-divider"></div>
       <a href="/facturas/nueva" class="btn btn-primary btn-sm">+ Nueva Factura</a>
       <div class="nav-divider"></div>
@@ -179,6 +57,7 @@ nav {
     </div>
     <div class="mobile-menu-section">Navegación</div>
     <a href="/dashboard"><span class="m-icon">📊</span> Dashboard</a>
+    <a href="/facturas"><span class="m-icon">🧾</span> Mis facturas</a>
     <a href="/facturas/nueva"><span class="m-icon">➕</span> Nueva Factura CFDI</a>
     <a href="/perfil"><span class="m-icon">🏢</span> Mi perfil fiscal</a>
     <a href="/precios"><span class="m-icon">💎</span> Planes y precios</a>

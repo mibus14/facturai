@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% block title %}Mis Facturas – FacturAI{% endblock %}
+{% block content %}
+<div class="dashboard">
+  <div class="dash-header">
+    <div>
+      <h1 style="font-size:1.6rem;font-weight:900;letter-spacing:-.5px;">Mis Facturas</h1>
+      <p style="color:var(--gray);margin-top:.2rem;font-size:.9rem;">
+        {{ invoices|length }} factura{% if invoices|length != 1 %}s{% endif %} en total
+      </p>
+    </div>
+    <div style="display:flex;gap:.6rem;flex-wrap:wrap;align-items:center;">
+      <a href="/dashboard" class="btn btn-ghost btn-sm">← Dashboard</a>
+      {% if user.plan != 'free' or user.invoices_created < 1 %}
+      <a href="/facturas/nueva" class="btn btn-primary">+ Nueva Factura CFDI</a>
+      {% else %}
+      <a href="/precios" class="btn btn-primary">Actualizar plan →</a>
+      {% endif %}
+    </div>
+  </div>
+
+  {% if request.query_params.get('deleted') %}
+  <div class="alert alert-success">✓ Factura eliminada correctamente.</div>
+  {% endif %}
+
+  <!-- Search -->
+  <form method="get" action="/facturas" style="margin-bottom:1.2rem;">
+    <div style="display:flex;gap:.6rem;max-width:520px;">
+      <input type="text" name="q" value="{{ q }}"
+             placeholder="Buscar por cliente, RFC o número..."
+             style="flex:1;padding:.65rem 1rem;border:1.5px solid var(--border);border-radius:50px;font-size:.9rem;font-family:inherit;outline:none;transition:border .18s;"
+             onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='var(--border)'">
+      <button type="submit" class="btn btn-primary btn-sm">Buscar</button>
+      {% if q %}<a href="/facturas" class="btn btn-ghost btn-sm">Limpiar</a>{% endif %}
+    </div>
+  </form>
+
+  <div class="card">
+    {% if invoices %}
+    <table>
+      <thead>
+        <tr>
+          <th>Número</th>
+          <th>Cliente</th>
+          <th>RFC Receptor</th>
+          <th>Fecha</th>
+          <th>Total MXN</th>
+          <th>Estado</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for inv in invoices %}
+        <tr>
+          <td><strong style="font-family:monospace;font-size:.88rem;">{{ inv.invoice_number }}</strong></td>
+          <td>{{ inv.client_name }}</td>
+          <td style="font-family:monospace;font-size:.8rem;color:var(--gray);">{{ inv.rfc_receptor or '—' }}</td>
+          <td>{{ inv.issue_date }}</td>
+          <td><strong>${{ "{:,.2f}".format(inv.total) }}</strong></td>
+          <td>
+            <span class="badge badge-{{ inv.status }}">
+              {% if inv.status == 'paid' %}✓ PAGADA
+              {% elif inv.status == 'sent' %}ENVIADA
+              {% elif inv.status == 'cancelled' %}CANCELADA
+              {% else %}{{ inv.status.upper() }}{% endif %}
+            </span>
+          </td>
+          <td><a href="/facturas/{{ inv.id }}" class="btn btn-ghost" style="padding:.3rem .8rem;font-size:.82rem;">Ver</a></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <div style="text-align:center;padding:4rem 2rem;color:var(--gray);">
+      {% if q %}
+      <div style="font-size:3rem;margin-bottom:1rem;">🔍</div>
+      <p style="font-size:1.05rem;font-weight:600;color:var(--dark);">Sin resultados para "{{ q }}"</p>
+      <p style="font-size:.88rem;margin-top:.4rem;">Intenta con otro nombre, RFC o número de factura.</p>
+      <a href="/facturas" class="btn btn-ghost" style="margin-top:1.2rem;">Ver todas las facturas</a>
+      {% else %}
+      <div style="font-size:4rem;margin-bottom:1rem;">🧾</div>
+      <p style="font-size:1.1rem;font-weight:600;color:var(--dark);">Aún no tienes facturas</p>
+      <p style="font-size:.88rem;margin-top:.4rem;">Crea tu primera factura CFDI 4.0 en menos de un minuto</p>
+      <a href="/facturas/nueva" class="btn btn-primary" style="margin-top:1.5rem;">Crear primera factura CFDI</a>
+      {% endif %}
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

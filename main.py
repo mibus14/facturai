@@ -23,9 +23,15 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="FacturAI", description="Facturación electrónica mexicana CFDI 4.0", lifespan=lifespan)
 
+_ALLOWED_ORIGINS = [o.strip() for o in os.getenv("CORS_ORIGINS", "").split(",") if o.strip()] or [
+    "https://facturai-three.vercel.app",
+    "http://localhost:8000",
+    "http://127.0.0.1:8000",
+]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=_ALLOWED_ORIGINS,
+    allow_credentials=True,
     allow_methods=["GET", "POST"],
     allow_headers=["Authorization", "Content-Type"],
 )
