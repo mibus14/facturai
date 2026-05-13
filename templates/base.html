@@ -9,6 +9,128 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 {% block head %}{% endblock %}
+<style>
+/* ── NAV MEJORADO ── */
+nav {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(255,255,255,0.92);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 2rem;
+  display: flex; align-items: center; justify-content: space-between;
+  height: 62px;
+}
+.nav-brand {
+  display: flex; align-items: center; gap: .5rem;
+  font-weight: 900; font-size: 1.2rem; color: var(--dark);
+  text-decoration: none; letter-spacing: -.02em;
+}
+.nav-brand span { color: var(--primary); }
+.nav-logo {
+  width: 32px; height: 32px; background: var(--primary);
+  color: white; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 900; font-size: 1rem;
+}
+.nav-links {
+  display: flex; align-items: center; gap: .25rem;
+}
+.nav-links a {
+  padding: 7px 14px; border-radius: 8px; font-size: .9rem;
+  font-weight: 500; color: var(--gray); text-decoration: none;
+  transition: background .15s, color .15s;
+}
+.nav-links a:hover { background: var(--light); color: var(--dark); }
+.nav-links a.nav-active { color: var(--primary); font-weight: 600; }
+.nav-links .btn-sm { padding: 8px 16px !important; font-size: .88rem !important; }
+.nav-divider {
+  width: 1px; height: 22px; background: var(--border); margin: 0 6px;
+}
+/* User chip */
+.nav-user-chip {
+  display: flex; align-items: center; gap: 8px;
+  padding: 5px 12px 5px 6px;
+  background: var(--light); border-radius: 99px;
+  border: 1px solid var(--border);
+}
+.nav-avatar {
+  width: 26px; height: 26px; border-radius: 50%;
+  background: var(--primary); color: white;
+  display: flex; align-items: center; justify-content: center;
+  font-size: .75rem; font-weight: 800; text-transform: uppercase;
+  flex-shrink: 0;
+}
+.nav-user-name { font-size: .82rem; font-weight: 600; color: var(--dark); max-width: 110px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.nav-logout {
+  padding: 7px 12px; border-radius: 8px; font-size: .85rem;
+  font-weight: 500; color: var(--gray); text-decoration: none;
+  transition: background .15s, color .15s; border: 1px solid var(--border);
+  margin-left: 4px;
+}
+.nav-logout:hover { background: #FEF2F2; color: #DC2626; border-color: #FECACA; }
+/* Hamburger */
+.nav-toggle {
+  display: none; flex-direction: column; gap: 5px;
+  background: none; border: none; cursor: pointer;
+  padding: 8px; border-radius: 8px;
+}
+.nav-toggle span {
+  display: block; width: 22px; height: 2px;
+  background: var(--dark); border-radius: 2px;
+  transition: transform .25s, opacity .25s;
+}
+.nav-toggle.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.nav-toggle.open span:nth-child(2) { opacity: 0; }
+.nav-toggle.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+/* ── MOBILE MENU ── */
+.mobile-menu {
+  display: none; position: fixed; inset: 62px 0 0 0;
+  background: white; z-index: 99; overflow-y: auto;
+  padding: 1.5rem 1.25rem 2rem; flex-direction: column; gap: .5rem;
+  opacity: 0; transform: translateY(-8px);
+  transition: opacity .2s, transform .2s;
+}
+.mobile-menu.open { opacity: 1; transform: translateY(0); }
+.mobile-menu-section {
+  font-size: .72rem; font-weight: 700; color: var(--gray);
+  text-transform: uppercase; letter-spacing: .08em;
+  padding: 1rem 4px 4px; margin-top: .5rem;
+}
+.mobile-menu a {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 14px; border-radius: 10px;
+  text-decoration: none; font-size: .95rem; font-weight: 500;
+  color: var(--dark); transition: background .15s;
+}
+.mobile-menu a:hover { background: var(--light); }
+.mobile-menu a .m-icon { font-size: 1.1rem; width: 24px; text-align: center; }
+.mobile-menu .btn { justify-content: center; margin-top: .5rem; }
+.mobile-menu-user {
+  display: flex; align-items: center; gap: 10px;
+  padding: 14px; background: var(--light); border-radius: 12px;
+  margin-bottom: .5rem;
+}
+.mobile-menu-user .nav-avatar { width: 38px; height: 38px; font-size: .95rem; }
+.mobile-menu-user-info { line-height: 1.3; }
+.mobile-menu-user-name { font-weight: 700; font-size: .95rem; color: var(--dark); }
+.mobile-menu-user-email { font-size: .78rem; color: var(--gray); }
+.mobile-divider { height: 1px; background: var(--border); margin: .5rem 0; }
+.mobile-logout {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 14px; border-radius: 10px;
+  text-decoration: none; font-size: .95rem; font-weight: 500;
+  color: #DC2626; transition: background .15s;
+}
+.mobile-logout:hover { background: #FEF2F2; }
+
+@media (max-width: 768px) {
+  .nav-links { display: none; }
+  .nav-toggle { display: flex; }
+  .mobile-menu { display: flex; }
+}
+</style>
 </head>
 <body>
 
@@ -19,21 +141,26 @@
     Factur<span>AI</span>
   </a>
 
-  <!-- Desktop links -->
+  <!-- Desktop -->
   <div class="nav-links">
-    <a href="/precios">Precios</a>
+    <a href="/precios" {% if request.url.path == '/precios' %}class="nav-active"{% endif %}>Precios</a>
     {% if user %}
-      <a href="/dashboard">Dashboard</a>
-      <a href="/perfil">Mi perfil</a>
+      <a href="/dashboard" {% if request.url.path == '/dashboard' %}class="nav-active"{% endif %}>Dashboard</a>
+      <a href="/perfil" {% if request.url.path == '/perfil' %}class="nav-active"{% endif %}>Mi perfil fiscal</a>
+      <div class="nav-divider"></div>
       <a href="/facturas/nueva" class="btn btn-primary btn-sm">+ Nueva Factura</a>
-      <a href="/logout" style="color:var(--gray)">Salir</a>
+      <div class="nav-divider"></div>
+      <div class="nav-user-chip">
+        <div class="nav-avatar">{{ user.name[0] }}</div>
+        <span class="nav-user-name">{{ user.name.split()[0] }}</span>
+      </div>
+      <a href="/logout" class="nav-logout">Salir</a>
     {% else %}
       <a href="/login">Iniciar sesión</a>
       <a href="/register" class="btn btn-primary btn-sm">Empezar gratis</a>
     {% endif %}
   </div>
 
-  <!-- Hamburger toggle -->
   <button class="nav-toggle" id="nav-toggle" aria-label="Menú">
     <span></span><span></span><span></span>
   </button>
@@ -41,15 +168,27 @@
 
 <!-- Mobile menu -->
 <div class="mobile-menu" id="mobile-menu">
-  <a href="/precios">Precios</a>
   {% if user %}
-    <a href="/dashboard">Dashboard</a>
-    <a href="/perfil">Mi perfil fiscal</a>
-    <a href="/facturas/nueva" class="btn btn-primary">+ Nueva Factura CFDI</a>
-    <a href="/logout">Cerrar sesión</a>
+    <div class="mobile-menu-user">
+      <div class="nav-avatar">{{ user.name[0] }}</div>
+      <div class="mobile-menu-user-info">
+        <div class="mobile-menu-user-name">{{ user.name }}</div>
+        <div class="mobile-menu-user-email">{{ user.email }}</div>
+      </div>
+    </div>
+    <div class="mobile-menu-section">Navegación</div>
+    <a href="/dashboard"><span class="m-icon">📊</span> Dashboard</a>
+    <a href="/facturas/nueva"><span class="m-icon">➕</span> Nueva Factura CFDI</a>
+    <a href="/perfil"><span class="m-icon">🏢</span> Mi perfil fiscal</a>
+    <a href="/precios"><span class="m-icon">💎</span> Planes y precios</a>
+    <div class="mobile-divider"></div>
+    <a href="/logout" class="mobile-logout"><span class="m-icon">🚪</span> Cerrar sesión</a>
   {% else %}
-    <a href="/login">Iniciar sesión</a>
-    <a href="/register" class="btn btn-primary">Empezar gratis</a>
+    <div class="mobile-menu-section">Cuenta</div>
+    <a href="/login"><span class="m-icon">👤</span> Iniciar sesión</a>
+    <a href="/register" class="btn btn-primary"><span>Empezar gratis — 1 factura sin tarjeta</span></a>
+    <div class="mobile-divider"></div>
+    <a href="/precios"><span class="m-icon">💎</span> Ver planes y precios</a>
   {% endif %}
 </div>
 
@@ -70,27 +209,18 @@
       <line x1="30" y1="4" x2="30" y2="14" stroke="#5B50F0" stroke-width="2.5" stroke-linecap="round"/>
       <circle cx="30" cy="3" r="4.5" fill="#10B981"/>
       <rect x="7" y="12" width="46" height="36" rx="13" fill="#5B50F0"/>
-      <!-- Eye whites -->
       <ellipse cx="19.5" cy="30" rx="7.5" ry="7.5" fill="white"/>
       <ellipse cx="40.5" cy="30" rx="7.5" ry="7.5" fill="white"/>
-      <!-- Pupils -->
       <ellipse class="eye-l" cx="20.5" cy="31" rx="4" ry="4" fill="#1E1B4B"/>
       <ellipse class="eye-r" cx="41.5" cy="31" rx="4" ry="4" fill="#1E1B4B"/>
-      <!-- Shine -->
       <circle cx="22" cy="28.5" r="1.8" fill="white"/>
       <circle cx="43" cy="28.5" r="1.8" fill="white"/>
-      <!-- Smile -->
       <path d="M17 42 Q30 51 43 42" stroke="white" stroke-width="2.2" fill="none" stroke-linecap="round"/>
-      <!-- Body -->
       <rect x="11" y="52" width="38" height="25" rx="9" fill="#3730A3"/>
-      <!-- Screen -->
       <rect x="17" y="57" width="26" height="13" rx="5" fill="#5B50F0"/>
       <text x="30" y="65.5" text-anchor="middle" fill="#10B981" font-size="4.8" font-weight="bold" font-family="monospace">CFDI 4.0</text>
-      <!-- Left arm -->
       <rect x="0" y="54" width="13" height="8" rx="4" fill="#3730A3"/>
-      <!-- Right arm (wave) -->
       <rect class="arm-wave" x="47" y="51" width="13" height="8" rx="4" fill="#3730A3"/>
-      <!-- Legs -->
       <rect x="16" y="75" width="10" height="5" rx="2.5" fill="#2E1065"/>
       <rect x="34" y="75" width="10" height="5" rx="2.5" fill="#2E1065"/>
     </svg>
@@ -128,7 +258,6 @@
 
 <script src="/static/js/main.js"></script>
 <script>
-  // Hamburger menu
   const toggle = document.getElementById('nav-toggle');
   const menu = document.getElementById('mobile-menu');
   toggle.addEventListener('click', () => {
@@ -136,7 +265,6 @@
     menu.classList.toggle('open');
     document.body.style.overflow = menu.classList.contains('open') ? 'hidden' : '';
   });
-  // Close menu on link click
   menu.querySelectorAll('a').forEach(a => a.addEventListener('click', () => {
     toggle.classList.remove('open');
     menu.classList.remove('open');

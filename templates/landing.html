@@ -1,6 +1,41 @@
 {% extends "base.html" %}
 {% block title %}FacturAI – Facturación CFDI 4.0 para México | Cumplimiento SAT{% endblock %}
+{% block head %}
+<style>
+/* ── LANDING EXTRAS ── */
+.launch-bar {
+  background: linear-gradient(90deg, #5B50F0, #7C3AED);
+  color: white; text-align: center;
+  padding: 10px 1rem; font-size: .88rem; font-weight: 600;
+  letter-spacing: .01em;
+}
+.launch-bar span { opacity: .85; font-weight: 400; margin-left: 8px; }
+
+/* Pricing landing */
+.price-old {
+  text-decoration: line-through; color: var(--gray);
+  font-size: .95rem; font-weight: 500;
+}
+.price-new { font-size: 2.6rem; font-weight: 900; line-height: 1; }
+.price-new span { font-size: 1rem; font-weight: 500; color: var(--gray); }
+.price-save {
+  display: inline-block; background: #D1FAE5; color: #065F46;
+  font-size: .75rem; font-weight: 700; padding: 2px 10px;
+  border-radius: 99px; margin-top: 4px;
+}
+.plan-card .plan-features li.minus {
+  color: #9CA3AF; text-decoration: line-through;
+}
+.plan-card .plan-features li.plus { font-weight: 600; color: var(--dark); }
+</style>
+{% endblock %}
 {% block content %}
+
+<!-- BARRA DE LANZAMIENTO -->
+<div class="launch-bar">
+  🎉 Oferta de lanzamiento: 50% de descuento en todos los planes de pago
+  <span>· Precio respetado de por vida</span>
+</div>
 
 <!-- HERO -->
 <section class="hero">
@@ -11,14 +46,14 @@
   <h1>Factura electrónica<br><span class="highlight">CFDI 4.0</span> en segundos</h1>
   <p>La plataforma de facturación más sencilla para freelancers y empresas mexicanas. RFC, régimen fiscal, forma de pago — todo en orden para el SAT.</p>
   <div class="hero-btns">
-    <a href="/register" class="btn btn-primary btn-lg">Empezar gratis – 3 facturas sin tarjeta</a>
-    <a href="/precios" class="btn btn-outline btn-lg">Ver planes</a>
+    <a href="/register" class="btn btn-primary btn-lg">Empezar gratis — 1 factura sin tarjeta</a>
+    <a href="/precios" class="btn btn-outline btn-lg">Ver planes con descuento</a>
   </div>
   <div class="hero-trust">
-    <span>Gratis para siempre (plan básico)</span>
-    <span>Sin instalar nada</span>
-    <span>Datos campos SAT</span>
-    <span>Imprime en PDF</span>
+    <span>✓ Sin tarjeta de crédito</span>
+    <span>✓ Sin instalar nada</span>
+    <span>✓ Campos SAT completos</span>
+    <span>✓ PDF profesional</span>
   </div>
 
   <!-- Preview factura -->
@@ -80,7 +115,7 @@
     <div class="feature-card">
       <div class="feature-icon">🖨️</div>
       <h3>PDF profesional</h3>
-      <p>Imprime o descarga cada factura como PDF con formato oficial. Aspecto 100% profesional ante tus clientes.</p>
+      <p>Descarga cada factura como PDF con formato oficial. Aspecto 100% profesional ante tus clientes.</p>
     </div>
     <div class="feature-card">
       <div class="feature-icon">🤖</div>
@@ -100,7 +135,7 @@
   </div>
 </section>
 
-<!-- SAT COMPLIANCE SECTION -->
+<!-- SAT COMPLIANCE -->
 <section class="sat-section">
   <div class="sat-inner">
     <h2 class="section-title" style="color:white;">Cumplimiento total con el SAT</h2>
@@ -123,26 +158,10 @@
         </div>
       </div>
       <div class="sat-badges">
-        <div class="sat-badge">
-          <div class="badge-icon">📋</div>
-          <div class="badge-title">CFDI 4.0</div>
-          <div class="badge-desc">Versión vigente SAT</div>
-        </div>
-        <div class="sat-badge">
-          <div class="badge-icon">💰</div>
-          <div class="badge-title">IVA 16%</div>
-          <div class="badge-desc">Tasa estándar México</div>
-        </div>
-        <div class="sat-badge">
-          <div class="badge-icon">🔖</div>
-          <div class="badge-title">RFC Validado</div>
-          <div class="badge-desc">Formato SAT</div>
-        </div>
-        <div class="sat-badge">
-          <div class="badge-icon">📄</div>
-          <div class="badge-title">PDF Oficial</div>
-          <div class="badge-desc">Representación impresa</div>
-        </div>
+        <div class="sat-badge"><div class="badge-icon">📋</div><div class="badge-title">CFDI 4.0</div><div class="badge-desc">Versión vigente SAT</div></div>
+        <div class="sat-badge"><div class="badge-icon">💰</div><div class="badge-title">IVA 16%</div><div class="badge-desc">Tasa estándar México</div></div>
+        <div class="sat-badge"><div class="badge-icon">🔖</div><div class="badge-title">RFC Validado</div><div class="badge-desc">Formato SAT</div></div>
+        <div class="sat-badge"><div class="badge-icon">📄</div><div class="badge-title">PDF Oficial</div><div class="badge-desc">Representación impresa</div></div>
       </div>
     </div>
   </div>
@@ -150,46 +169,72 @@
 
 <!-- PRICING PREVIEW -->
 <section class="pricing">
-  <h2 class="section-title">Planes simples y transparentes</h2>
-  <p class="section-sub">Empieza gratis. Crece cuando lo necesites. Sin letra pequeña.</p>
+  <div style="text-align:center;margin-bottom:2rem;">
+    <div style="display:inline-flex;align-items:center;gap:8px;background:linear-gradient(90deg,#5B50F0,#7C3AED);color:white;padding:6px 20px;border-radius:99px;font-size:.85rem;font-weight:700;margin-bottom:1rem;">
+      🎉 50% de descuento — Oferta de lanzamiento
+    </div>
+    <h2 class="section-title" style="margin-bottom:.5rem;">Planes simples y transparentes</h2>
+    <p class="section-sub">Empieza gratis con 1 factura de prueba. Escala cuando lo necesites.</p>
+  </div>
+
   <div class="pricing-grid">
+
+    <!-- FREE -->
     <div class="plan-card">
       <div class="plan-name">Gratis</div>
-      <div class="plan-price">$0<span>/mes</span></div>
-      <ul class="plan-features">
-        <li>3 facturas por mes</li>
-        <li>PDF descargable</li>
-        <li>Campos CFDI 4.0</li>
-        <li>Asistente Max IA</li>
+      <div class="price-new">$0<span>/mes</span></div>
+      <ul class="plan-features" style="margin-top:.75rem;">
+        <li>✓ 1 factura CFDI en PDF</li>
+        <li>✓ Campos CFDI 4.0</li>
+        <li>✓ Vista previa profesional</li>
+        <li class="minus">Facturas ilimitadas</li>
+        <li class="minus">Historial de facturas</li>
+        <li class="minus">Asistente Max IA</li>
+        <li class="minus">Numeración automática</li>
       </ul>
-      <a href="/register" class="btn btn-outline" style="width:100%;justify-content:center">Empezar gratis</a>
+      <a href="/register" class="btn btn-outline" style="width:100%;justify-content:center;margin-top:1rem;">Probar gratis</a>
     </div>
+
+    <!-- BÁSICO -->
     <div class="plan-card featured">
       <span class="plan-badge">MÁS POPULAR</span>
       <div class="plan-name">Básico</div>
-      <div class="plan-price">$199<span>/mes</span></div>
-      <ul class="plan-features">
-        <li>Facturas ilimitadas</li>
-        <li>PDF profesional</li>
-        <li>Numeración automática</li>
-        <li>Historial completo</li>
-        <li>Soporte por email</li>
+      <div class="price-old">$199/mes</div>
+      <div class="price-new">$99<span>/mes MXN</span></div>
+      <div class="price-save">🔥 Ahorras $100/mes</div>
+      <ul class="plan-features" style="margin-top:.75rem;">
+        <li class="plus">✓ Facturas CFDI ilimitadas</li>
+        <li class="plus">✓ PDF profesional descargable</li>
+        <li class="plus">✓ Numeración automática (Serie + Folio)</li>
+        <li class="plus">✓ Historial completo de facturas</li>
+        <li class="plus">✓ Asistente IA Max completo</li>
+        <li class="plus">✓ Soporte por email</li>
       </ul>
-      <a href="/register" class="btn btn-primary" style="width:100%;justify-content:center">Empezar ahora</a>
+      <a href="/register" class="btn btn-primary" style="width:100%;justify-content:center;margin-top:1rem;">Empezar con Básico</a>
     </div>
+
+    <!-- PRO -->
     <div class="plan-card">
       <div class="plan-name">Pro</div>
-      <div class="plan-price">$399<span>/mes</span></div>
-      <ul class="plan-features">
-        <li>Todo lo del Básico</li>
-        <li>Múltiples empresas</li>
-        <li>Exportar a CSV/Excel</li>
-        <li>Acceso API</li>
-        <li>Soporte prioritario 24h</li>
+      <div class="price-old">$399/mes</div>
+      <div class="price-new">$199<span>/mes MXN</span></div>
+      <div class="price-save">🔥 Ahorras $200/mes</div>
+      <ul class="plan-features" style="margin-top:.75rem;">
+        <li class="plus">✓ Todo lo del plan Básico</li>
+        <li class="plus">✓ Múltiples empresas / RFC</li>
+        <li class="plus">✓ Exportar a CSV/Excel</li>
+        <li class="plus">✓ Acceso completo a la API</li>
+        <li class="plus">✓ Soporte prioritario 24 horas</li>
+        <li class="plus">✓ Funciones exclusivas anticipadas</li>
       </ul>
-      <a href="/register" class="btn btn-outline" style="width:100%;justify-content:center">Empezar Pro</a>
+      <a href="/register" class="btn btn-outline" style="width:100%;justify-content:center;margin-top:1rem;">Empezar con Pro</a>
     </div>
+
   </div>
+
+  <p style="text-align:center;color:var(--gray);font-size:.85rem;margin-top:1.5rem;">
+    💳 Pago seguro con Mercado Pago · Cancela cuando quieras · Sin permanencia
+  </p>
 </section>
 
 <!-- TESTIMONIOS -->
@@ -218,7 +263,7 @@
 <!-- CTA FINAL -->
 <section class="cta-banner">
   <h2>Empieza a facturar con el SAT hoy</h2>
-  <p>Sin tarjeta de crédito. Sin complicaciones. Cumple con el SAT desde el primer día.</p>
+  <p>1 factura gratis, sin tarjeta. Planes desde $99/mes con 50% de descuento.</p>
   <a href="/register" class="btn btn-secondary btn-lg">Crear mi cuenta gratis</a>
 </section>
 
