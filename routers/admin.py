@@ -13,31 +13,45 @@ SETUP_KEY = os.getenv("ADMIN_SETUP_KEY", "")
 @router.post("/first-setup")
 def first_setup(body: dict):
     """Endpoint temporal: marca un usuario como admin. Requiere ADMIN_SETUP_KEY."""
-    if not SETUP_KEY or body.get("key") != SETUP_KEY:
-        raise HTTPException(403, "Clave inválida")
-    email = body.get("email", "")
-    if not email:
-        raise HTTPException(400, "Email requerido")
-    db = get_db()
-    existing = db.execute("SELECT id FROM users WHERE email=?", (email,)).fetchone()
-    if existing:
-        db.execute("UPDATE users SET is_admin=1 WHERE email=?", (email,))
+    try:
+        if not SETUP_KEY or body.get("key") != SETUP_KEY:
+            raise HTTPException(403, "Clave inválida")
+        email = body.get("email", "")
+        if not email:
+            raise HTTPException(400, "Email requerido")
+
+        # Asegurar que la columna is_admin exista
+        db = get_db()
+        try:
+            db.execute("ALTER TABLE users ADD COLUMN is_admin INTEGER DEFAULT 0")
+            db.commit()
+        except Exception:
+            pass
+
+        existing = db.execute("SELECT id FROM users WHERE email=?", (email,)).fetchone()
+        if existing:
+            db.execute("UPDATE users SET is_admin=1 WHERE email=?", (email,))
+            db.commit()
+            db.close()
+            return {"ok": True, "msg": f"{email} ahora es admin"}
+
+        # Si no existe, lo crea
+        password = body.get("password", "")
+        name = body.get("name", "Admin")
+        if not password:
+            raise HTTPException(400, "El usuario no existe en esta BD. Regístrate primero en el sitio, o incluye 'password' para crearlo.")
+        db.execute(
+            """INSERT INTO users (name, email, password_hash, plan, subscription_status, is_admin)
+               VALUES (?, ?, ?, 'free', 'inactive', 1)""",
+            (name, email, hash_password(password)),
+        )
         db.commit()
         db.close()
-        return {"ok": True, "msg": f"{email} ahora es admin"}
-    # Si no existe, lo crea
-    password = body.get("password", "")
-    name = body.get("name", "Admin")
-    if not password:
-        raise HTTPException(400, "El usuario no existe, incluye 'password' para crearlo")
-    db.execute(
-        """INSERT INTO users (name, email, password_hash, plan, subscription_status, is_admin)
-           VALUES (?, ?, ?, 'free', 'inactive', 1)""",
-        (name, email, hash_password(password)),
-    )
-    db.commit()
-    db.close()
-    return {"ok": True, "msg": f"Admin creado: {email}"}
+        return {"ok": True, "msg": f"Admin creado: {email}"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(500, f"Error interno: {type(e).__name__}: {e}")
 
 
 def _get_admin(authorization: Optional[str] = Header(None)):
