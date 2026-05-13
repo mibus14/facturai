@@ -4,11 +4,21 @@ import sqlite3
 DATABASE_URL = os.getenv("DATABASE_URL", "")
 IS_POSTGRES = bool(DATABASE_URL)
 
+def _clean_pg_url(url):
+    """Strip parameters psycopg2 doesn't support (e.g. channel_binding)."""
+    from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
+    p = urlparse(url)
+    qs = parse_qs(p.query, keep_blank_values=True)
+    qs.pop("channel_binding", None)
+    cleaned = urlunparse(p._replace(query=urlencode(qs, doseq=True)))
+    return cleaned
+
 if IS_POSTGRES:
     import psycopg2
     import psycopg2.extras
-    _PG_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1) \
-              if DATABASE_URL.startswith("postgres://") else DATABASE_URL
+    _raw = DATABASE_URL.replace("postgres://", "postgresql://", 1) \
+           if DATABASE_URL.startswith("postgres://") else DATABASE_URL
+    _PG_URL = _clean_pg_url(_raw)
 else:
     DB_PATH = "/tmp/facturai.db" if os.getenv("VERCEL") else os.path.join(os.path.dirname(__file__), "facturai.db")
 
