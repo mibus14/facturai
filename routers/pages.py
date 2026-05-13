@@ -184,7 +184,7 @@ def nueva_factura(request: Request, user=Depends(get_current_user)):
     db.close()
     plan = user_row["plan"]
     count = user_row["invoices_created"]
-    if plan == "free" and count >= 3:
+    if plan == "free" and count >= 1:
         return RedirectResponse("/precios?upgrade=1", status_code=302)
     return templates.TemplateResponse(request, "nueva_factura.html", {
         "user": dict(user_row),
@@ -222,7 +222,7 @@ def crear_factura(
     user_row = db.execute("SELECT * FROM users WHERE id=?", (uid,)).fetchone()
     plan = user_row["plan"]
     count = user_row["invoices_created"]
-    if plan == "free" and count >= 3:
+    if plan == "free" and count >= 1:
         db.close()
         return RedirectResponse("/precios?upgrade=1", status_code=302)
 

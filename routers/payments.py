@@ -15,7 +15,7 @@ MP_PLAN_PRO_ID = os.getenv("MP_PLAN_PRO_ID", "")
 MP_WEBHOOK_SECRET = os.getenv("MP_WEBHOOK_SECRET", "")
 
 PLAN_IDS = {"basic": MP_PLAN_BASIC_ID, "pro": MP_PLAN_PRO_ID}
-PLAN_AMOUNTS = {"basic": 199, "pro": 399}
+PLAN_AMOUNTS = {"basic": 99, "pro": 199}
 
 MP_API = "https://api.mercadopago.com"
 

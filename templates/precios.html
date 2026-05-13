@@ -1,117 +1,154 @@
 {% extends "base.html" %}
 {% block title %}Precios – FacturAI{% endblock %}
 {% block content %}
-<section class="pricing" style="padding-top:3rem;">
+<style>
+  .pricing-hero { text-align:center; padding: 3rem 1rem 2rem; }
+  .pricing-hero h1 { font-size:2.2rem; font-weight:900; margin-bottom:.5rem; }
+  .pricing-hero p { color:var(--gray); font-size:1.05rem; }
+  .discount-banner {
+    display:inline-block; background:linear-gradient(90deg,#6c63ff,#f59e0b);
+    color:#fff; font-size:.82rem; font-weight:700; letter-spacing:.06em;
+    padding:5px 18px; border-radius:99px; margin-bottom:1.5rem;
+    text-transform:uppercase;
+  }
+  .plan-old-price {
+    text-decoration:line-through; color:var(--gray); font-size:1rem;
+    font-weight:500; margin-bottom:2px;
+  }
+  .plan-price { font-size:2.6rem; font-weight:900; }
+  .plan-price span { font-size:1rem; font-weight:500; color:var(--gray); }
+  .plan-savings {
+    display:inline-block; background:rgba(34,197,94,.12); color:#22c55e;
+    font-size:.75rem; font-weight:700; padding:2px 10px; border-radius:99px;
+    margin-top:4px;
+  }
+  .trial-badge {
+    background:rgba(108,99,255,.12); color:var(--accent);
+    font-size:.75rem; font-weight:700; padding:3px 10px; border-radius:99px;
+    display:inline-block; margin-bottom:.5rem;
+  }
+</style>
+
+<div class="pricing-hero">
   {% if upgrade %}
-  <div class="alert alert-warning" style="max-width:600px;margin:0 auto 2rem;">
-    ⚠️ Has alcanzado el límite de facturas del plan gratuito. Actualiza para seguir facturando sin límites.
+  <div class="alert alert-warning" style="max-width:600px;margin:0 auto 1.5rem;">
+    ⚠️ Has alcanzado el límite del plan gratuito. Actualiza para seguir facturando.
   </div>
   {% endif %}
+  <div class="discount-banner">🎉 Lanzamiento — 50% de descuento por tiempo limitado</div>
+  <h1>Planes simples y transparentes</h1>
+  <p>Sin letra pequeña. Cancela cuando quieras. Precios en pesos mexicanos.</p>
+</div>
 
-  <h1 class="section-title">Planes simples y transparentes</h1>
-  <p class="section-sub">Sin letra pequeña. Cancela cuando quieras. Precios en pesos mexicanos.</p>
+<div class="pricing-grid">
 
-  <div class="pricing-grid">
-    <!-- FREE -->
-    <div class="plan-card">
-      <div class="plan-name">Gratis</div>
-      <div class="plan-price">$0<span>/mes</span></div>
-      <ul class="plan-features">
-        <li>3 facturas CFDI por mes</li>
-        <li>PDF descargable</li>
-        <li>Campos CFDI 4.0 completos</li>
-        <li>Asistente IA Max</li>
-        <li style="text-decoration:line-through;color:var(--gray);">Facturas ilimitadas</li>
-      </ul>
-      {% if user %}
-        {% if user.plan == 'free' %}
-        <button class="btn btn-ghost" style="width:100%;justify-content:center;" disabled>Plan actual</button>
-        {% else %}
-        <button class="btn btn-ghost" style="width:100%;justify-content:center;" disabled>Incluido</button>
-        {% endif %}
+  <!-- FREE -->
+  <div class="plan-card">
+    <div class="trial-badge">✨ Prueba gratuita</div>
+    <div class="plan-name">Gratis</div>
+    <div class="plan-price">$0<span>/mes</span></div>
+    <ul class="plan-features">
+      <li>1 factura CFDI en PDF</li>
+      <li>Todos los campos CFDI 4.0</li>
+      <li>Vista previa profesional</li>
+      <li>Asistente IA Max</li>
+      <li style="text-decoration:line-through;color:var(--gray);">Facturas ilimitadas</li>
+    </ul>
+    {% if user %}
+      {% if user.plan == 'free' %}
+      <button class="btn btn-ghost" style="width:100%;justify-content:center;" disabled>Plan actual</button>
       {% else %}
-      <a href="/register" class="btn btn-outline" style="width:100%;justify-content:center;">Empezar gratis</a>
+      <button class="btn btn-ghost" style="width:100%;justify-content:center;" disabled>Incluido</button>
       {% endif %}
-    </div>
-
-    <!-- BÁSICO -->
-    <div class="plan-card featured">
-      <span class="plan-badge">MÁS POPULAR</span>
-      <div class="plan-name">Básico</div>
-      <div class="plan-price">$199<span>/mes MXN</span></div>
-      <ul class="plan-features">
-        <li>Facturas CFDI ilimitadas</li>
-        <li>PDF profesional</li>
-        <li>Numeración automática (Serie + Folio)</li>
-        <li>Historial completo</li>
-        <li>Asistente IA Max completo</li>
-        <li>Soporte por email</li>
-      </ul>
-      {% if user %}
-        {% if user.plan == 'basic' %}
-        <button class="btn btn-primary" style="width:100%;justify-content:center;" disabled>Plan actual</button>
-        {% else %}
-        <button class="btn btn-primary subscribe-btn" style="width:100%;justify-content:center;" data-plan="basic">
-          Suscribirme – $199/mes
-        </button>
-        {% endif %}
-      {% else %}
-      <a href="/register" class="btn btn-primary" style="width:100%;justify-content:center;">Empezar ahora</a>
-      {% endif %}
-    </div>
-
-    <!-- PRO -->
-    <div class="plan-card">
-      <div class="plan-name">Pro</div>
-      <div class="plan-price">$399<span>/mes MXN</span></div>
-      <ul class="plan-features">
-        <li>Todo lo del Básico</li>
-        <li>Múltiples empresas / RFC</li>
-        <li>Exportar a CSV/Excel</li>
-        <li>Acceso API</li>
-        <li>Soporte prioritario 24h</li>
-      </ul>
-      {% if user %}
-        {% if user.plan == 'pro' %}
-        <button class="btn btn-primary" style="width:100%;justify-content:center;" disabled>Plan actual</button>
-        {% else %}
-        <button class="btn btn-outline subscribe-btn" style="width:100%;justify-content:center;" data-plan="pro">
-          Suscribirme – $399/mes
-        </button>
-        {% endif %}
-      {% else %}
-      <a href="/register" class="btn btn-outline" style="width:100%;justify-content:center;">Empezar Pro</a>
-      {% endif %}
-    </div>
+    {% else %}
+    <a href="/register" class="btn btn-outline" style="width:100%;justify-content:center;">Empezar gratis</a>
+    {% endif %}
   </div>
 
-  <!-- FAQ -->
-  <div style="max-width:700px;margin:4rem auto 0;">
-    <h2 style="text-align:center;font-size:1.6rem;font-weight:800;margin-bottom:2rem;">Preguntas frecuentes</h2>
-    <div style="display:flex;flex-direction:column;gap:1rem;">
-      <details style="background:var(--light);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1rem;">
-        <summary style="font-weight:700;cursor:pointer;">¿Puedo cancelar en cualquier momento?</summary>
-        <p style="margin-top:.8rem;color:var(--gray);">Sí, cancela cuando quieras desde tu panel. No hay permanencia ni penalizaciones.</p>
-      </details>
-      <details style="background:var(--light);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1rem;">
-        <summary style="font-weight:700;cursor:pointer;">¿Las facturas son válidas ante el SAT?</summary>
-        <p style="margin-top:.8rem;color:var(--gray);">FacturAI genera todos los campos correctos del CFDI 4.0. Para el timbrado fiscal válido ante el SAT se requiere un PAC (Proveedor Autorizado de Certificación). Estamos integrando esta funcionalidad próximamente.</p>
-      </details>
-      <details style="background:var(--light);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1rem;">
-        <summary style="font-weight:700;cursor:pointer;">¿Qué es el RFC y por qué lo necesito?</summary>
-        <p style="margin-top:.8rem;color:var(--gray);">El RFC (Registro Federal de Contribuyentes) es tu identificación fiscal ante el SAT. Desde el CFDI 4.0, es obligatorio para el emisor y receptor. Si aún no tienes RFC, puedes tramitarlo en el SAT en línea.</p>
-      </details>
-      <details style="background:var(--light);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1rem;">
-        <summary style="font-weight:700;cursor:pointer;">¿Qué métodos de pago aceptan?</summary>
-        <p style="margin-top:.8rem;color:var(--gray);">Aceptamos tarjetas de crédito y débito (Visa, Mastercard), transferencias bancarias y más, a través de Mercado Pago.</p>
-      </details>
-      <details style="background:var(--light);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1rem;">
-        <summary style="font-weight:700;cursor:pointer;">¿Qué pasa con mis datos si cancelo?</summary>
-        <p style="margin-top:.8rem;color:var(--gray);">Tus facturas se conservan durante 30 días después de la cancelación. Puedes exportarlas antes de que se eliminen. El SAT exige conservarlas por 5 años.</p>
-      </details>
-    </div>
+  <!-- BÁSICO -->
+  <div class="plan-card featured">
+    <span class="plan-badge">MÁS POPULAR</span>
+    <div class="plan-name">Básico</div>
+    <div class="plan-old-price">$199/mes</div>
+    <div class="plan-price">$99<span>/mes MXN</span></div>
+    <div class="plan-savings">Ahorras $100/mes</div>
+    <ul class="plan-features" style="margin-top:1rem;">
+      <li>Facturas CFDI ilimitadas</li>
+      <li>PDF profesional descargable</li>
+      <li>Numeración automática (Serie + Folio)</li>
+      <li>Historial completo</li>
+      <li>Asistente IA Max completo</li>
+      <li>Soporte por email</li>
+    </ul>
+    {% if user %}
+      {% if user.plan == 'basic' %}
+      <button class="btn btn-primary" style="width:100%;justify-content:center;" disabled>Plan actual</button>
+      {% else %}
+      <button class="btn btn-primary subscribe-btn" style="width:100%;justify-content:center;"
+              data-plan="basic" data-label="Suscribirme – $99/mes">
+        Suscribirme – $99/mes
+      </button>
+      {% endif %}
+    {% else %}
+    <a href="/register" class="btn btn-primary" style="width:100%;justify-content:center;">Empezar ahora</a>
+    {% endif %}
   </div>
-</section>
+
+  <!-- PRO -->
+  <div class="plan-card">
+    <div class="plan-name">Pro</div>
+    <div class="plan-old-price">$399/mes</div>
+    <div class="plan-price">$199<span>/mes MXN</span></div>
+    <div class="plan-savings">Ahorras $200/mes</div>
+    <ul class="plan-features" style="margin-top:1rem;">
+      <li>Todo lo del Básico</li>
+      <li>Múltiples empresas / RFC</li>
+      <li>Exportar a CSV/Excel</li>
+      <li>Acceso API</li>
+      <li>Soporte prioritario 24h</li>
+    </ul>
+    {% if user %}
+      {% if user.plan == 'pro' %}
+      <button class="btn btn-primary" style="width:100%;justify-content:center;" disabled>Plan actual</button>
+      {% else %}
+      <button class="btn btn-outline subscribe-btn" style="width:100%;justify-content:center;"
+              data-plan="pro" data-label="Suscribirme – $199/mes">
+        Suscribirme – $199/mes
+      </button>
+      {% endif %}
+    {% else %}
+    <a href="/register" class="btn btn-outline" style="width:100%;justify-content:center;">Empezar Pro</a>
+    {% endif %}
+  </div>
+
+</div>
+
+<!-- FAQ -->
+<div style="max-width:700px;margin:4rem auto 0;">
+  <h2 style="text-align:center;font-size:1.6rem;font-weight:800;margin-bottom:2rem;">Preguntas frecuentes</h2>
+  <div style="display:flex;flex-direction:column;gap:1rem;">
+    <details style="background:var(--light);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1rem;">
+      <summary style="font-weight:700;cursor:pointer;">¿Cuánto dura el descuento de lanzamiento?</summary>
+      <p style="margin-top:.8rem;color:var(--gray);">El precio de lanzamiento está disponible por tiempo limitado. Una vez que te suscribas, ese precio se respeta aunque luego suba.</p>
+    </details>
+    <details style="background:var(--light);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1rem;">
+      <summary style="font-weight:700;cursor:pointer;">¿Puedo cancelar en cualquier momento?</summary>
+      <p style="margin-top:.8rem;color:var(--gray);">Sí, cancela cuando quieras desde tu panel. No hay permanencia ni penalizaciones.</p>
+    </details>
+    <details style="background:var(--light);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1rem;">
+      <summary style="font-weight:700;cursor:pointer;">¿Las facturas son válidas ante el SAT?</summary>
+      <p style="margin-top:.8rem;color:var(--gray);">FacturAI genera todos los campos correctos del CFDI 4.0. Para el timbrado fiscal válido ante el SAT se requiere un PAC (Proveedor Autorizado de Certificación). Estamos integrando esta funcionalidad próximamente.</p>
+    </details>
+    <details style="background:var(--light);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1rem;">
+      <summary style="font-weight:700;cursor:pointer;">¿Qué métodos de pago aceptan?</summary>
+      <p style="margin-top:.8rem;color:var(--gray);">Aceptamos tarjetas de crédito y débito (Visa, Mastercard), transferencias bancarias, OXXO Pay y más, a través de Mercado Pago.</p>
+    </details>
+    <details style="background:var(--light);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1rem;">
+      <summary style="font-weight:700;cursor:pointer;">¿Qué pasa con mis datos si cancelo?</summary>
+      <p style="margin-top:.8rem;color:var(--gray);">Tus facturas se conservan durante 30 días después de la cancelación. Puedes exportarlas antes de que se eliminen. El SAT exige conservarlas por 5 años.</p>
+    </details>
+  </div>
+</div>
 {% endblock %}
 
 {% block scripts %}
@@ -119,17 +156,38 @@
 <script>
 document.querySelectorAll('.subscribe-btn').forEach(btn => {
   btn.addEventListener('click', async () => {
+    const originalText = btn.dataset.label;
     btn.disabled = true;
-    btn.textContent = 'Redirigiendo a Mercado Pago...';
+    btn.textContent = 'Conectando con Mercado Pago...';
     const plan = btn.dataset.plan;
-    const resp = await fetch(`/payments/checkout/${plan}`, { method: 'POST' });
-    const data = await resp.json();
-    if (data.url) {
-      window.location.href = data.url;
-    } else {
-      alert('Error al procesar el pago. Inténtalo de nuevo.');
+    try {
+      const resp = await fetch(`/payments/checkout/${plan}`, {
+        method: 'POST',
+        credentials: 'include',
+      });
+
+      // Si redirigió a login, mandar al login
+      if (resp.redirected || resp.url.includes('/login')) {
+        window.location.href = '/login';
+        return;
+      }
+
+      if (!resp.ok) {
+        let msg = 'Error al conectar con el servidor de pagos.';
+        try { const e = await resp.json(); msg = e.detail || msg; } catch(_) {}
+        throw new Error(msg);
+      }
+
+      const data = await resp.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        throw new Error('No se recibió enlace de pago.');
+      }
+    } catch (err) {
+      alert('⚠️ ' + err.message);
       btn.disabled = false;
-      btn.textContent = btn.dataset.plan === 'basic' ? 'Suscribirme – $199/mes' : 'Suscribirme – $399/mes';
+      btn.textContent = originalText;
     }
   });
 });
