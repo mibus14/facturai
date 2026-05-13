@@ -6,7 +6,8 @@ from auth import hash_password, verify_password, create_token, get_current_user,
 import os
 
 router = APIRouter()
-templates = Jinja2Templates(directory="templates")
+_BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+templates = Jinja2Templates(directory=os.path.join(_BASE, "templates"))
 
 STRIPE_PK = os.getenv("STRIPE_PUBLISHABLE_KEY", "")
 
