@@ -52,6 +52,12 @@ async def _get_plan_url(plan: str) -> str:
 async def create_checkout(plan: str, request: Request, user=Depends(get_current_user)):
     if plan not in PLAN_IDS:
         raise HTTPException(400, "Plan inválido")
+    uid = int(user["sub"])
+    db = get_db()
+    user_row = db.execute("SELECT plan, subscription_status FROM users WHERE id=?", (uid,)).fetchone()
+    db.close()
+    if user_row and user_row["plan"] == plan and user_row["subscription_status"] == "active":
+        raise HTTPException(400, "Ya tienes este plan activo. Si quieres cancelar, contáctanos.")
     url = await _get_plan_url(plan)
     return JSONResponse({"url": url})
 

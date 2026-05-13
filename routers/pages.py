@@ -271,6 +271,14 @@ def ver_factura(inv_id: int, request: Request, user=Depends(get_current_user)):
 
 @router.get("/precios", response_class=HTMLResponse)
 def precios(request: Request, upgrade: int = 0, user=Depends(get_current_user_optional)):
+    user_data = user
+    if user:
+        uid = int(user["sub"])
+        db = get_db()
+        user_row = db.execute("SELECT * FROM users WHERE id=?", (uid,)).fetchone()
+        db.close()
+        if user_row:
+            user_data = dict(user_row)
     return templates.TemplateResponse(request, "precios.html", {
-        "user": user, "stripe_pk": STRIPE_PK, "upgrade": upgrade,
+        "user": user_data, "stripe_pk": STRIPE_PK, "upgrade": upgrade,
     })
