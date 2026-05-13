@@ -138,6 +138,20 @@ _SCHEMA_SQLITE = """
         created_at TEXT DEFAULT (datetime('now')),
         FOREIGN KEY (user_id) REFERENCES users(id)
     );
+    CREATE TABLE IF NOT EXISTS payments (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER,
+        mp_payment_id TEXT,
+        mp_subscription_id TEXT,
+        plan TEXT,
+        amount REAL NOT NULL,
+        currency TEXT DEFAULT 'MXN',
+        status TEXT DEFAULT 'pending',
+        payment_method TEXT,
+        description TEXT,
+        created_at TEXT DEFAULT (datetime('now')),
+        FOREIGN KEY (user_id) REFERENCES users(id)
+    );
 """
 
 _SCHEMA_PG = [
