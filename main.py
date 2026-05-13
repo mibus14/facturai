@@ -5,7 +5,7 @@ import os
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from database import init_db
-from routers import pages, payments, ai
+from routers import pages, payments, ai, admin
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 IS_VERCEL = bool(os.getenv("VERCEL"))
@@ -29,3 +29,4 @@ if not IS_VERCEL:
 app.include_router(pages.router)
 app.include_router(payments.router)
 app.include_router(ai.router)
+app.include_router(admin.router)

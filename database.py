@@ -108,8 +108,10 @@ _SCHEMA_SQLITE = """
         plan TEXT DEFAULT 'free',
         stripe_customer_id TEXT,
         stripe_subscription_id TEXT,
+        mp_subscription_id TEXT,
         subscription_status TEXT DEFAULT 'inactive',
         invoices_created INTEGER DEFAULT 0,
+        is_admin INTEGER DEFAULT 0,
         created_at TEXT DEFAULT (datetime('now'))
     );
     CREATE TABLE IF NOT EXISTS invoices (
@@ -209,6 +211,10 @@ _MIGRATIONS = [
     "ALTER TABLE invoices ADD COLUMN forma_pago TEXT DEFAULT '03'",
     "ALTER TABLE invoices ADD COLUMN metodo_pago TEXT DEFAULT 'PUE'",
     "ALTER TABLE invoices ADD COLUMN moneda TEXT DEFAULT 'MXN'",
+    "ALTER TABLE users ADD COLUMN mp_subscription_id TEXT",
+    "ALTER TABLE users ADD COLUMN is_admin INTEGER DEFAULT 0",
+    "ALTER TABLE users ADD COLUMN stripe_customer_id TEXT",
+    "ALTER TABLE users ADD COLUMN stripe_subscription_id TEXT",
 ]
 
 
