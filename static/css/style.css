@@ -376,20 +376,51 @@ tr:hover td { background: #FAFAFF; }
 
 /* ── INVOICE ITEMS ─────────────────────────────────────────── */
 .items-header {
-  display: grid; grid-template-columns: 3fr 1fr 1fr 1fr auto;
-  gap: .5rem; margin-bottom: .4rem;
+  display: grid; grid-template-columns: 3fr 1fr 1fr 1fr 2rem;
+  gap: .5rem; margin-bottom: .3rem; padding: 0 .75rem;
+}
+.items-header span {
+  font-size: .7rem; font-weight: 700; color: var(--gray-light);
+  text-transform: uppercase; letter-spacing: .04em;
 }
 #items-container .item-row {
-  display: grid; grid-template-columns: 3fr 1fr 1fr 1fr auto;
-  gap: .5rem; align-items: center; margin-bottom: .5rem;
+  display: grid; grid-template-columns: 3fr 1fr 1fr 1fr 2rem;
+  gap: .4rem; align-items: center; margin-bottom: .4rem;
+  background: white; border: 1.5px solid var(--border);
+  border-radius: var(--radius-xs); padding: .3rem .5rem;
+  transition: border-color .15s, box-shadow .15s;
 }
-.item-row input { margin-bottom: 0; }
+#items-container .item-row:hover {
+  border-color: #c7c2f8; box-shadow: var(--shadow-xs);
+}
+.item-row input {
+  margin-bottom: 0; border: none !important; background: transparent !important;
+  border-radius: 6px !important; padding: .4rem .5rem !important;
+  font-size: .9rem; box-shadow: none !important; min-height: unset;
+}
+.item-row input:focus {
+  outline: none; background: var(--primary-light) !important;
+}
+.item-row .item-total { font-weight: 700; color: var(--primary); }
 .remove-item {
-  background: none; border: none; color: var(--danger); font-size: 1.1rem;
-  cursor: pointer; width: 36px; height: 36px; border-radius: var(--radius-xs);
-  display: flex; align-items: center; justify-content: center; transition: background .15s;
+  background: none; border: none; color: #cbd5e1; font-size: .8rem;
+  cursor: pointer; width: 28px; height: 28px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  transition: background .15s, color .15s; flex-shrink: 0; padding: 0;
 }
-.remove-item:hover { background: #FEE2E2; }
+.remove-item:hover { background: #fee2e2; color: var(--danger); }
+#add-item {
+  margin-top: .75rem !important; width: 100% !important;
+  justify-content: center !important; border-style: dashed !important;
+  border-color: var(--border) !important; color: var(--gray) !important;
+  background: transparent !important; border-radius: var(--radius-xs) !important;
+  font-size: .88rem !important; gap: .4rem; padding: .65rem 1rem !important;
+  transition: border-color .18s, color .18s, background .18s !important;
+}
+#add-item:hover {
+  border-color: var(--primary) !important; color: var(--primary) !important;
+  background: var(--primary-light) !important;
+}
 .totals { text-align: right; margin-top: 1.3rem; }
 .totals p { margin-bottom: .35rem; color: var(--gray); font-size: .9rem; }
 .totals strong { color: var(--dark); }
@@ -642,11 +673,33 @@ footer a { color: var(--primary); }
   .form-row, .form-row-3 { grid-template-columns: 1fr; }
   .form-card { padding: 1.2rem; }
 
-  /* Invoice items */
+  /* Invoice items — card layout on mobile */
   .items-header { display: none; }
-  #items-container .item-row { grid-template-columns: 1fr 1fr; grid-template-rows: auto auto; }
-  #items-container .item-row input:first-child { grid-column: 1 / -1; }
-  #items-container .item-row input:last-child { display: none; }
+  #items-container .item-row {
+    grid-template-columns: 1fr 1fr auto;
+    grid-template-areas:
+      "desc desc del"
+      "qty  price total";
+    padding: .75rem; gap: .5rem; margin-bottom: .75rem;
+    border-radius: var(--radius-sm);
+  }
+  #items-container .item-row .item-desc { grid-area: desc; }
+  #items-container .item-row .item-qty  { grid-area: qty; }
+  #items-container .item-row .item-price{ grid-area: price; }
+  #items-container .item-row .item-total{
+    grid-area: total; text-align: right;
+    font-size: .85rem; padding: .4rem .25rem !important;
+  }
+  #items-container .item-row .remove-item {
+    grid-area: del; border-radius: var(--radius-xs);
+    background: #fee2e2; color: var(--danger);
+    width: 32px; height: 32px;
+  }
+  #items-container .item-row input {
+    border: 1.5px solid var(--border) !important;
+    background: white !important; border-radius: 8px !important;
+    padding: .5rem .6rem !important;
+  }
 
   /* Dashboard */
   .dashboard { padding: 0 1rem; margin-top: 1rem; }
