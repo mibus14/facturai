@@ -10,3 +10,5 @@ facturai.db
 dist/
 build/
 /tmp/
+node_modules/
+package-lock.json

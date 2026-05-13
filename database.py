@@ -10,7 +10,7 @@ if IS_POSTGRES:
     _PG_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1) \
               if DATABASE_URL.startswith("postgres://") else DATABASE_URL
 else:
-    DB_PATH = os.path.join(os.path.dirname(__file__), "facturai.db")
+    DB_PATH = "/tmp/facturai.db" if os.getenv("VERCEL") else os.path.join(os.path.dirname(__file__), "facturai.db")
 
 
 class _Row(dict):
