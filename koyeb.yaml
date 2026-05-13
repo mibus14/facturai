@@ -1,0 +1,20 @@
+services:
+  - name: facturai
+    type: web
+    github:
+      repository: mibus14/facturai
+      branch: main
+      build_type: dockerfile
+    ports:
+      - port: 8080
+        protocol: http
+    routes:
+      - path: /
+        port: 8080
+    instance_types:
+      - type: nano
+    regions:
+      - was
+    env:
+      - key: PORT
+        value: "8080"
