@@ -201,20 +201,20 @@ _SCHEMA_PG = [
 ]
 
 _MIGRATIONS = [
-    "ALTER TABLE users ADD COLUMN rfc TEXT",
-    "ALTER TABLE users ADD COLUMN regimen_fiscal TEXT DEFAULT '612'",
-    "ALTER TABLE users ADD COLUMN cp TEXT",
-    "ALTER TABLE invoices ADD COLUMN rfc_receptor TEXT",
-    "ALTER TABLE invoices ADD COLUMN regimen_fiscal_receptor TEXT",
-    "ALTER TABLE invoices ADD COLUMN cp_receptor TEXT",
-    "ALTER TABLE invoices ADD COLUMN uso_cfdi TEXT DEFAULT 'G03'",
-    "ALTER TABLE invoices ADD COLUMN forma_pago TEXT DEFAULT '03'",
-    "ALTER TABLE invoices ADD COLUMN metodo_pago TEXT DEFAULT 'PUE'",
-    "ALTER TABLE invoices ADD COLUMN moneda TEXT DEFAULT 'MXN'",
-    "ALTER TABLE users ADD COLUMN mp_subscription_id TEXT",
-    "ALTER TABLE users ADD COLUMN is_admin INTEGER DEFAULT 0",
-    "ALTER TABLE users ADD COLUMN stripe_customer_id TEXT",
-    "ALTER TABLE users ADD COLUMN stripe_subscription_id TEXT",
+    "ALTER TABLE users ADD COLUMN IF NOT EXISTS rfc TEXT",
+    "ALTER TABLE users ADD COLUMN IF NOT EXISTS regimen_fiscal TEXT DEFAULT '612'",
+    "ALTER TABLE users ADD COLUMN IF NOT EXISTS cp TEXT",
+    "ALTER TABLE invoices ADD COLUMN IF NOT EXISTS rfc_receptor TEXT",
+    "ALTER TABLE invoices ADD COLUMN IF NOT EXISTS regimen_fiscal_receptor TEXT",
+    "ALTER TABLE invoices ADD COLUMN IF NOT EXISTS cp_receptor TEXT",
+    "ALTER TABLE invoices ADD COLUMN IF NOT EXISTS uso_cfdi TEXT DEFAULT 'G03'",
+    "ALTER TABLE invoices ADD COLUMN IF NOT EXISTS forma_pago TEXT DEFAULT '03'",
+    "ALTER TABLE invoices ADD COLUMN IF NOT EXISTS metodo_pago TEXT DEFAULT 'PUE'",
+    "ALTER TABLE invoices ADD COLUMN IF NOT EXISTS moneda TEXT DEFAULT 'MXN'",
+    "ALTER TABLE users ADD COLUMN IF NOT EXISTS mp_subscription_id TEXT",
+    "ALTER TABLE users ADD COLUMN IF NOT EXISTS is_admin INTEGER DEFAULT 0",
+    "ALTER TABLE users ADD COLUMN IF NOT EXISTS stripe_customer_id TEXT",
+    "ALTER TABLE users ADD COLUMN IF NOT EXISTS stripe_subscription_id TEXT",
 ]
 
 
@@ -224,14 +224,20 @@ def init_db():
         cur = conn._conn.cursor()
         for stmt in _SCHEMA_PG:
             cur.execute(stmt)
+        conn.commit()
     else:
         conn._conn.executescript(_SCHEMA_SQLITE)
 
     for sql in _MIGRATIONS:
         try:
             conn.execute(sql)
+            conn.commit()
         except Exception:
-            pass
+            if IS_POSTGRES:
+                try:
+                    conn._conn.rollback()
+                except Exception:
+                    pass
 
     conn.commit()
     conn.close()

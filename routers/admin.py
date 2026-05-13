@@ -20,14 +20,20 @@ def first_setup(body: dict):
         if not email:
             raise HTTPException(400, "Email requerido")
 
-        # Asegurar que la columna is_admin exista
-        db = get_db()
+        # Asegurar que la columna is_admin exista (conexión aparte para aislar el error)
         try:
-            db.execute("ALTER TABLE users ADD COLUMN is_admin INTEGER DEFAULT 0")
-            db.commit()
+            db_mig = get_db()
+            db_mig.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS is_admin INTEGER DEFAULT 0")
+            db_mig.commit()
+            db_mig.close()
         except Exception:
-            pass
+            try:
+                db_mig._conn.rollback()
+                db_mig.close()
+            except Exception:
+                pass
 
+        db = get_db()
         existing = db.execute("SELECT id FROM users WHERE email=?", (email,)).fetchone()
         if existing:
             db.execute("UPDATE users SET is_admin=1 WHERE email=?", (email,))
