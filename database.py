@@ -1,24 +1,32 @@
 import os
 import sqlite3
+from urllib.parse import urlparse, parse_qs
 
 DATABASE_URL = os.getenv("DATABASE_URL", "")
 IS_POSTGRES = bool(DATABASE_URL)
 
-def _clean_pg_url(url):
-    """Strip parameters psycopg2 doesn't support (e.g. channel_binding)."""
-    from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
+def _parse_pg_url(url):
+    url = url.replace("postgres://", "postgresql://", 1)
     p = urlparse(url)
-    qs = parse_qs(p.query, keep_blank_values=True)
-    qs.pop("channel_binding", None)
-    cleaned = urlunparse(p._replace(query=urlencode(qs, doseq=True)))
-    return cleaned
+    qs = parse_qs(p.query)
+    kwargs = {
+        "host": p.hostname,
+        "port": p.port or 5432,
+        "user": p.username,
+        "password": p.password,
+        "database": p.path.lstrip("/"),
+    }
+    if qs.get("sslmode", [""])[0] == "require":
+        import ssl
+        ctx = ssl.create_default_context()
+        ctx.check_hostname = False
+        ctx.verify_mode = ssl.CERT_NONE
+        kwargs["ssl_context"] = ctx
+    return kwargs
 
 if IS_POSTGRES:
-    import psycopg2
-    import psycopg2.extras
-    _raw = DATABASE_URL.replace("postgres://", "postgresql://", 1) \
-           if DATABASE_URL.startswith("postgres://") else DATABASE_URL
-    _PG_URL = _clean_pg_url(_raw)
+    import pg8000.dbapi as _pg
+    _PG_KWARGS = _parse_pg_url(DATABASE_URL)
 else:
     DB_PATH = "/tmp/facturai.db" if os.getenv("VERCEL") else os.path.join(os.path.dirname(__file__), "facturai.db")
 
@@ -41,7 +49,8 @@ class _Cursor:
         if row is None:
             return None
         if self._is_pg:
-            return _Row(dict(row))
+            cols = [d[0] for d in self._raw.description]
+            return _Row(dict(zip(cols, row)))
         return _Row({k: row[k] for k in row.keys()})
 
     def fetchone(self):
@@ -54,7 +63,7 @@ class _Cursor:
 class Connection:
     def __init__(self):
         if IS_POSTGRES:
-            self._conn = psycopg2.connect(_PG_URL)
+            self._conn = _pg.connect(**_PG_KWARGS)
         else:
             self._conn = sqlite3.connect(DB_PATH)
             self._conn.row_factory = sqlite3.Row
@@ -72,10 +81,7 @@ class Connection:
 
     def execute(self, sql, params=()):
         sql = self._adapt(sql)
-        if self._is_pg:
-            cur = self._conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-        else:
-            cur = self._conn.cursor()
+        cur = self._conn.cursor()
         cur.execute(sql, params)
         return _Cursor(cur, self._is_pg)
 
@@ -134,8 +140,8 @@ _SCHEMA_SQLITE = """
     );
 """
 
-_SCHEMA_PG = """
-    CREATE TABLE IF NOT EXISTS users (
+_SCHEMA_PG = [
+    """CREATE TABLE IF NOT EXISTS users (
         id BIGSERIAL PRIMARY KEY,
         name TEXT NOT NULL,
         email TEXT UNIQUE NOT NULL,
@@ -149,8 +155,8 @@ _SCHEMA_PG = """
         subscription_status TEXT DEFAULT 'inactive',
         invoices_created INTEGER DEFAULT 0,
         created_at TEXT DEFAULT CURRENT_TIMESTAMP
-    );
-    CREATE TABLE IF NOT EXISTS invoices (
+    )""",
+    """CREATE TABLE IF NOT EXISTS invoices (
         id BIGSERIAL PRIMARY KEY,
         user_id BIGINT NOT NULL,
         invoice_number TEXT NOT NULL,
@@ -175,8 +181,8 @@ _SCHEMA_PG = """
         status TEXT DEFAULT 'draft',
         created_at TEXT DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (user_id) REFERENCES users(id)
-    );
-"""
+    )""",
+]
 
 _MIGRATIONS = [
     "ALTER TABLE users ADD COLUMN rfc TEXT",
@@ -194,16 +200,12 @@ _MIGRATIONS = [
 
 def init_db():
     conn = get_db()
-    schema = _SCHEMA_PG if IS_POSTGRES else _SCHEMA_SQLITE
-
     if IS_POSTGRES:
         cur = conn._conn.cursor()
-        for stmt in schema.strip().split(";"):
-            stmt = stmt.strip()
-            if stmt:
-                cur.execute(stmt)
+        for stmt in _SCHEMA_PG:
+            cur.execute(stmt)
     else:
-        conn._conn.executescript(schema)
+        conn._conn.executescript(_SCHEMA_SQLITE)
 
     for sql in _MIGRATIONS:
         try:
