@@ -4,6 +4,7 @@ load_dotenv()
 import os
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from database import init_db
 from routers import pages, payments, ai, admin
 
@@ -21,6 +22,13 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(title="FacturAI", description="Facturación electrónica mexicana CFDI 4.0", lifespan=lifespan)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["GET", "POST"],
+    allow_headers=["Authorization", "Content-Type"],
+)
 
 if not IS_VERCEL:
     from fastapi.staticfiles import StaticFiles

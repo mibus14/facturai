@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FacturAI Admin</title>
+<style>
+  :root {
+    --bg: #0f1117; --card: #1a1d2e; --accent: #6c63ff;
+    --success: #22c55e; --warning: #f59e0b; --danger: #ef4444;
+    --text: #e2e8f0; --muted: #64748b; --border: #2d3148;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'Inter', system-ui, sans-serif; min-height: 100vh; }
+
+  /* LOGIN */
+  #login-screen {
+    display: flex; align-items: center; justify-content: center; min-height: 100vh;
+  }
+  .login-card {
+    background: var(--card); border-radius: 16px; padding: 48px 40px;
+    width: 380px; display: flex; flex-direction: column; gap: 16px; align-items: center;
+  }
+  .logo { font-size: 2rem; font-weight: 800; color: var(--accent); }
+  .subtitle { color: var(--muted); font-size: .875rem; margin-top: -8px; }
+  input {
+    width: 100%; padding: 11px 16px; background: var(--bg); border: 1px solid var(--border);
+    border-radius: 8px; color: var(--text); font-size: .95rem; outline: none;
+  }
+  input:focus { border-color: var(--accent); }
+  .btn {
+    width: 100%; padding: 11px; background: var(--accent); border: none;
+    border-radius: 8px; color: #fff; font-size: .95rem; font-weight: 600;
+    cursor: pointer; transition: opacity .2s;
+  }
+  .btn:hover { opacity: .85; }
+  .btn:disabled { opacity: .5; cursor: not-allowed; }
+  .error-msg { color: var(--danger); font-size: .85rem; min-height: 18px; }
+
+  /* DASHBOARD */
+  #dashboard { display: none; }
+  .layout { display: flex; min-height: 100vh; }
+
+  /* SIDEBAR */
+  .sidebar {
+    width: 210px; background: var(--card); display: flex; flex-direction: column;
+    padding: 28px 12px 20px; position: fixed; top: 0; left: 0; height: 100vh;
+  }
+  .sidebar-logo { font-size: 1.3rem; font-weight: 800; color: var(--accent); text-align: center; }
+  .sidebar-sub { color: var(--muted); font-size: .75rem; text-align: center; margin: 4px 0 24px; }
+  .nav-btn {
+    display: block; width: 100%; text-align: left; padding: 10px 14px;
+    background: transparent; border: none; color: var(--text); font-size: .9rem;
+    border-radius: 8px; cursor: pointer; margin-bottom: 4px; transition: background .15s;
+  }
+  .nav-btn:hover { background: var(--border); }
+  .nav-btn.active { background: var(--accent); color: #fff; }
+  .logout-btn {
+    margin-top: auto; color: var(--muted); background: transparent; border: none;
+    font-size: .85rem; cursor: pointer; padding: 10px 14px; text-align: left;
+    border-radius: 8px; width: 100%;
+  }
+  .logout-btn:hover { background: #3d1515; color: var(--danger); }
+  .admin-name { text-align: center; color: var(--muted); font-size: .78rem; margin-top: 8px; }
+
+  /* CONTENT */
+  .content { margin-left: 210px; padding: 36px 40px; flex: 1; }
+  .page-title { font-size: 1.5rem; font-weight: 800; margin-bottom: 24px; }
+
+  /* STATS */
+  .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 28px; }
+  .stat-card {
+    background: var(--card); border-radius: 12px; padding: 20px 22px;
+  }
+  .stat-label { color: var(--muted); font-size: .8rem; margin-bottom: 8px; }
+  .stat-value { font-size: 1.8rem; font-weight: 800; }
+  .stat-sub { color: var(--muted); font-size: .78rem; margin-top: 8px; }
+
+  /* REFRESH BTN */
+  .refresh-btn {
+    padding: 8px 18px; background: var(--accent); border: none; border-radius: 8px;
+    color: #fff; font-size: .85rem; cursor: pointer; margin-bottom: 20px;
+  }
+  .refresh-btn:hover { opacity: .85; }
+
+  /* TABLE */
+  .search-bar {
+    padding: 9px 14px; background: var(--card); border: 1px solid var(--border);
+    border-radius: 8px; color: var(--text); font-size: .9rem; width: 340px;
+    margin-bottom: 16px; outline: none;
+  }
+  .search-bar:focus { border-color: var(--accent); }
+  .table-wrap { background: var(--card); border-radius: 12px; overflow: hidden; }
+  table { width: 100%; border-collapse: collapse; }
+  thead th {
+    background: var(--border); padding: 12px 16px; text-align: left;
+    font-size: .8rem; font-weight: 700; color: var(--muted); text-transform: uppercase;
+    letter-spacing: .04em;
+  }
+  tbody tr { border-bottom: 1px solid var(--border); transition: background .1s; }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: rgba(108,99,255,.07); }
+  tbody td { padding: 11px 16px; font-size: .88rem; }
+  .badge {
+    display: inline-block; padding: 2px 10px; border-radius: 99px; font-size: .75rem; font-weight: 600;
+  }
+  .badge-active { background: rgba(34,197,94,.15); color: var(--success); }
+  .badge-free { background: rgba(100,116,139,.15); color: var(--muted); }
+  .badge-basic { background: rgba(108,99,255,.2); color: var(--accent); }
+  .badge-pro { background: rgba(245,158,11,.15); color: var(--warning); }
+  .badge-approved { background: rgba(34,197,94,.15); color: var(--success); }
+  .badge-pending { background: rgba(245,158,11,.15); color: var(--warning); }
+  .badge-rejected, .badge-cancelled { background: rgba(239,68,68,.15); color: var(--danger); }
+  .spinner { text-align: center; padding: 40px; color: var(--muted); font-size: .9rem; }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="logo">⚡ FacturAI</div>
+    <div class="subtitle">Panel de Administración</div>
+    <input id="email" type="email" placeholder="Correo electrónico" />
+    <input id="password" type="password" placeholder="Contraseña" />
+    <div class="error-msg" id="err"></div>
+    <button class="btn" id="login-btn" onclick="doLogin()">Entrar</button>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dashboard">
+  <div class="layout">
+    <nav class="sidebar">
+      <div class="sidebar-logo">⚡ FacturAI</div>
+      <div class="sidebar-sub">Admin Panel</div>
+      <button class="nav-btn active" id="nav-inicio" onclick="showTab('inicio')">🏠  Inicio</button>
+      <button class="nav-btn" id="nav-usuarios" onclick="showTab('usuarios')">👥  Usuarios</button>
+      <button class="nav-btn" id="nav-pagos" onclick="showTab('pagos')">💳  Pagos</button>
+      <button class="logout-btn" onclick="logout()">🚪  Cerrar sesión</button>
+      <div class="admin-name" id="admin-name"></div>
+    </nav>
+    <main class="content" id="content"></main>
+  </div>
+</div>
+
+<script>
+const API = 'https://facturai-three.vercel.app';
+let TOKEN = '';
+
+async function doLogin() {
+  const btn = document.getElementById('login-btn');
+  const err = document.getElementById('err');
+  btn.disabled = true; btn.textContent = 'Verificando...'; err.textContent = '';
+  try {
+    const r = await fetch(`${API}/api/admin/login`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ email: document.getElementById('email').value, password: document.getElementById('password').value })
+    });
+    const d = await r.json();
+    if (r.ok) {
+      TOKEN = d.token;
+      document.getElementById('admin-name').textContent = `Hola, ${d.name}`;
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('dashboard').style.display = 'block';
+      showTab('inicio');
+    } else {
+      err.textContent = d.detail || 'Error de autenticación';
+    }
+  } catch(e) { err.textContent = 'Sin conexión con el servidor'; }
+  btn.disabled = false; btn.textContent = 'Entrar';
+}
+document.addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+
+function apiHeaders() { return { 'Authorization': `Bearer ${TOKEN}`, 'Content-Type': 'application/json' }; }
+
+function showTab(tab) {
+  ['inicio','usuarios','pagos'].forEach(t => {
+    document.getElementById(`nav-${t}`).classList.toggle('active', t === tab);
+  });
+  const c = document.getElementById('content');
+  if (tab === 'inicio') renderInicio(c);
+  else if (tab === 'usuarios') renderUsuarios(c);
+  else if (tab === 'pagos') renderPagos(c);
+}
+
+// ─── INICIO ───
+async function renderInicio(c) {
+  c.innerHTML = `<div class="page-title">Dashboard</div>
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-label">👥 Usuarios</div><div class="stat-value" id="s-users">—</div></div>
+      <div class="stat-card"><div class="stat-label">✅ Suscripciones activas</div><div class="stat-value" style="color:var(--success)" id="s-subs">—</div></div>
+      <div class="stat-card"><div class="stat-label">💰 Ingresos mensuales</div><div class="stat-value" style="color:var(--warning)" id="s-rev">—</div></div>
+      <div class="stat-card"><div class="stat-label">🧾 Facturas generadas</div><div class="stat-value" style="color:var(--muted)" id="s-inv">—</div></div>
+    </div>
+    <div class="stat-sub" id="s-detail" style="margin-bottom:20px;color:var(--muted);font-size:.85rem"></div>
+    <button class="refresh-btn" onclick="loadStats()">↻  Actualizar</button>`;
+  loadStats();
+}
+async function loadStats() {
+  try {
+    const r = await fetch(`${API}/api/admin/stats`, { headers: apiHeaders() });
+    const d = await r.json();
+    document.getElementById('s-users').textContent = d.total_users;
+    document.getElementById('s-subs').textContent = d.active_subscriptions;
+    document.getElementById('s-rev').textContent = `$${d.monthly_revenue.toLocaleString()} MXN`;
+    document.getElementById('s-inv').textContent = d.total_invoices;
+    document.getElementById('s-detail').textContent =
+      `Básico: ${d.basic_subscriptions}   |   Pro: ${d.pro_subscriptions}   |   Ingresos totales: $${d.total_revenue.toLocaleString('es-MX', {minimumFractionDigits:2})} MXN`;
+  } catch(e) { console.error(e); }
+}
+
+// ─── USUARIOS ───
+let allUsers = [];
+async function renderUsuarios(c) {
+  c.innerHTML = `
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+      <div class="page-title" style="margin:0">Usuarios</div>
+      <button class="refresh-btn" style="margin:0" onclick="loadUsuarios()">↻  Actualizar</button>
+    </div>
+    <input class="search-bar" placeholder="Buscar por nombre o email..." oninput="filterUsuarios(this.value)" />
+    <div class="table-wrap">
+      <table>
+        <thead><tr>
+          <th>#</th><th>Nombre</th><th>Email</th><th>Plan</th><th>Estado</th><th>Facturas</th><th>Registro</th>
+        </tr></thead>
+        <tbody id="users-tbody"><tr><td colspan="7" class="spinner">Cargando...</td></tr></tbody>
+      </table>
+    </div>`;
+  loadUsuarios();
+}
+async function loadUsuarios() {
+  try {
+    const r = await fetch(`${API}/api/admin/users`, { headers: apiHeaders() });
+    allUsers = await r.json();
+    filterUsuarios('');
+  } catch(e) { document.getElementById('users-tbody').innerHTML = `<tr><td colspan="7" class="spinner">Error al cargar</td></tr>`; }
+}
+function filterUsuarios(q) {
+  const rows = allUsers.filter(u =>
+    !q || u.name.toLowerCase().includes(q.toLowerCase()) || u.email.toLowerCase().includes(q.toLowerCase())
+  );
+  const planBadge = { free: 'badge-free', basic: 'badge-basic', pro: 'badge-pro' };
+  const statusBadge = { active: 'badge-active', cancelled: 'badge-cancelled', inactive: 'badge-free', paused: 'badge-pending' };
+  const planLabel = { free: 'Gratis', basic: 'Básico', pro: 'Pro' };
+  document.getElementById('users-tbody').innerHTML = rows.length
+    ? rows.map(u => `<tr>
+        <td>${u.id}</td>
+        <td>${u.name}</td>
+        <td style="color:var(--muted)">${u.email}</td>
+        <td><span class="badge ${planBadge[u.plan]||'badge-free'}">${planLabel[u.plan]||u.plan}</span></td>
+        <td><span class="badge ${statusBadge[u.subscription_status]||'badge-free'}">${u.subscription_status||'—'}</span></td>
+        <td style="text-align:center">${u.invoices_created||0}</td>
+        <td style="color:var(--muted)">${(u.created_at||'').slice(0,10)}</td>
+      </tr>`).join('')
+    : `<tr><td colspan="7" class="spinner">Sin resultados</td></tr>`;
+}
+
+// ─── PAGOS ───
+async function renderPagos(c) {
+  c.innerHTML = `
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+      <div class="page-title" style="margin:0">Pagos</div>
+      <button class="refresh-btn" style="margin:0" onclick="loadPagos()">↻  Actualizar</button>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr>
+          <th>#</th><th>Usuario</th><th>Email</th><th>Plan</th><th>Monto</th><th>Estado</th><th>Método</th><th>Fecha</th>
+        </tr></thead>
+        <tbody id="pagos-tbody"><tr><td colspan="8" class="spinner">Cargando...</td></tr></tbody>
+      </table>
+    </div>`;
+  loadPagos();
+}
+async function loadPagos() {
+  try {
+    const r = await fetch(`${API}/api/admin/payments`, { headers: apiHeaders() });
+    const data = await r.json();
+    const statusBadge = { approved: 'badge-approved', pending: 'badge-pending', rejected: 'badge-rejected' };
+    document.getElementById('pagos-tbody').innerHTML = data.length
+      ? data.map(p => `<tr>
+          <td>${p.id}</td>
+          <td>${p.user_name||'—'}</td>
+          <td style="color:var(--muted)">${p.email||'—'}</td>
+          <td>${p.plan||'—'}</td>
+          <td style="font-weight:600">$${(p.amount||0).toLocaleString('es-MX',{minimumFractionDigits:2})} ${p.currency||'MXN'}</td>
+          <td><span class="badge ${statusBadge[p.status]||'badge-free'}">${p.status||'—'}</span></td>
+          <td style="color:var(--muted)">${p.payment_method||'—'}</td>
+          <td style="color:var(--muted)">${(p.created_at||'').slice(0,10)}</td>
+        </tr>`).join('')
+      : `<tr><td colspan="8" class="spinner">Sin pagos registrados aún</td></tr>`;
+  } catch(e) { document.getElementById('pagos-tbody').innerHTML = `<tr><td colspan="8" class="spinner">Error al cargar</td></tr>`; }
+}
+
+function logout() { TOKEN = ''; document.getElementById('dashboard').style.display='none'; document.getElementById('login-screen').style.display='flex'; }
+</script>
+</body>
+</html>
