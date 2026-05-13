@@ -26,16 +26,9 @@ Nunca des asesoría legal específica, solo información general.
 
 @router.post("/chat")
 async def chat_endpoint(request: Request):
-    try:
-        import anthropic
-    except ImportError:
-        return JSONResponse({"content": "El servicio de IA no está disponible en este momento."})
-
-    api_key = os.getenv("ANTHROPIC_API_KEY", "")
+    api_key = os.getenv("GROQ_API_KEY", "")
     if not api_key:
-        return JSONResponse({
-            "content": "¡Hola! Soy Max 🤖 Para activar el asistente de IA completo, configura la variable `ANTHROPIC_API_KEY` en tu archivo `.env`. Mientras tanto, puedes consultar el SAT en sat.gob.mx o preguntarle a tu contador. ¡Estoy aquí para cuando me necesites!"
-        })
+        return JSONResponse({"content": "¡Hola! Soy Max 🤖 El asistente no está configurado aún. Contacta al administrador."})
 
     body = await request.json()
     messages = body.get("messages", [])
@@ -43,12 +36,14 @@ async def chat_endpoint(request: Request):
     if not messages:
         return JSONResponse({"content": "¡Hola! Soy Max, tu asistente de facturación mexicana. ¿En qué puedo ayudarte hoy?"})
 
-    client = anthropic.Anthropic(api_key=api_key)
-    response = client.messages.create(
-        model="claude-haiku-4-5-20251001",
-        max_tokens=600,
-        system=SYSTEM_PROMPT,
-        messages=messages,
-    )
-
-    return JSONResponse({"content": response.content[0].text})
+    try:
+        from groq import Groq
+        client = Groq(api_key=api_key)
+        response = client.chat.completions.create(
+            model="llama-3.3-70b-versatile",
+            max_tokens=600,
+            messages=[{"role": "system", "content": SYSTEM_PROMPT}] + messages,
+        )
+        return JSONResponse({"content": response.choices[0].message.content})
+    except Exception as e:
+        return JSONResponse({"content": f"Error al contactar el asistente: {str(e)}"}, status_code=500)
